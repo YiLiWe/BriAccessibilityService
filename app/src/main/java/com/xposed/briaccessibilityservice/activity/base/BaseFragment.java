@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.viewbinding.ViewBinding;
 
-import com.xposed.jagohook.activity.base.utils.ViewBindingUtil;
+import com.xposed.briaccessibilityservice.activity.base.utils.ViewBindingUtil;
 
 import java.lang.reflect.InvocationTargetException;
 
