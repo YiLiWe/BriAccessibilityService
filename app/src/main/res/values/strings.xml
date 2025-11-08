@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">BriAccessibilityService</string>
+    <string name="accessibility_service_description">监听</string>
+</resources>

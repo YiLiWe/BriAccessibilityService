@@ -1,0 +1,68 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'com.xposed.briaccessibilityservice'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.xposed.briaccessibilityservice"
+        minSdk 28
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += [
+                        "room.schemaLocation"  : "$projectDir/schemas".toString(),
+                        "room.incremental"     : "true",
+                        "room.expandProjection": "true"]
+                /*
+                Room 具有以下注释处理器选项：
+                room.schemaLocation：配置并启用将数据库架构导出到给定目录中的 JSON 文件的功能。
+                                    [创建好表和数据库后编译，会在 app/schemas 目录下生成这个 JSON 文件]
+                room.incremental：启用 Gradle 增量注释处理器。
+                room.expandProjection：配置 Room 以重写查询，使其顶部星形投影在展开后仅包含 DAO 方法返回类型中定义的列。
+                */
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation("androidx.room:room-runtime:2.6.1")
+    annotationProcessor "androidx.room:room-compiler:2.6.1"
+    implementation 'com.github.getActivity:XXPermissions:26.5'
+
+    implementation libs.refresh.layout.kernel      //核心必须依赖
+    implementation libs.refresh.header.classics    //经典刷新头
+    implementation libs.refresh.footer.classics    //经典加载
+    implementation libs.okhttp
+    implementation libs.fastjson
+
+    implementation libs.lombok
+    annotationProcessor libs.lombok
+
+    implementation libs.appcompat
+    implementation libs.material
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+}
