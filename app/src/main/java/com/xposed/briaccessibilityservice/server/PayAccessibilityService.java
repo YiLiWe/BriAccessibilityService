@@ -116,7 +116,7 @@ public class PayAccessibilityService extends AccessibilityService {
                 if (nodeInfoMap.containsKey("Transfer")) {
                     AccessibilityNodeInfo Transfer = nodeInfoMap.get("Transfer");
                     AccessibilityNodeInfo TransferRoot = Transfer.getParent().getParent().getParent();
-                    clickButton(Transfer);
+                    clickButton(TransferRoot);
                 }
             } else if (isBill) {   //首页余额，点击查看账单
                 clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362021");
