@@ -78,10 +78,10 @@ public class PayAccessibilityService extends AccessibilityService {
     private void mutasi(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366272")) {//账单父类
             AccessibilityNodeInfo list = viewIdResourceMap.get("id.co.bri.brimo:id/2131366272");
-            if (list == null) return;
-            List<AccessibilityNodeInfo> nodeInfos = list.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131364918");
-            BillUtils billEntity = new BillUtils(nodeInfos);
-
+            if (list != null) {
+                List<AccessibilityNodeInfo> nodeInfos = list.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131364918");
+                BillUtils billEntity = new BillUtils(nodeInfos);
+            }
             handler.postDelayed(() -> {
                 AccessibleUtil.performPullDown(PayAccessibilityService.this, 500, 1000, 1000);
                 isBill = false;
