@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Data;
+import lombok.ToString;
+
 public class PayAccessibilityService extends AccessibilityService {
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -62,9 +65,44 @@ public class PayAccessibilityService extends AccessibilityService {
         try {
             login(nodeInfoMap, viewIdResourceMap);
             home(nodeInfoMap, viewIdResourceMap);
+            mutasi(nodeInfoMap, viewIdResourceMap);
         } catch (Throwable e) {
             logWindow.printA("代码执行异常：" + e.getMessage());
             Logs.d("代码执行异常:" + e.getMessage());
+        }
+    }
+
+    //账单
+    private void mutasi(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
+        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366272")) {//账单父类
+            AccessibilityNodeInfo list = viewIdResourceMap.get("id.co.bri.brimo:id/2131366272");
+            if (list == null) return;
+            List<AccessibilityNodeInfo> nodeInfos = list.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131364918");
+            BillEntity billEntity = new BillEntity(nodeInfos);
+            Logs.d(billEntity.toString());
+        }
+    }
+
+    @Data
+    @ToString
+    private class BillEntity {
+        private String name; //Transfer Ke RAGA AJAIBAN via BRImo
+        private String money;//- Rp15.000,00 + Rp500.000,00
+        private String time;//18:28:16 WIB
+
+        public BillEntity(List<AccessibilityNodeInfo> nodeInfos) {
+            for (AccessibilityNodeInfo item : nodeInfos) {
+                name = handlerName(item.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131368916"));
+                money = handlerName(item.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131368297"));
+                time = handlerName(item.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131368697"));
+            }
+        }
+
+        public String handlerName(List<AccessibilityNodeInfo> nodeInfos) {
+            for (AccessibilityNodeInfo accessibilityNodeInfo : nodeInfos) {
+                return accessibilityNodeInfo.getText().toString();
+            }
+            return null;
         }
     }
 
