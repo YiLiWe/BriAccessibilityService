@@ -20,6 +20,7 @@ public class PayAccessibilityService extends AccessibilityService {
     //=========实体类==========
     private LogWindow logWindow;
     private AppConfig appConfig;
+    private SuServer suServer;
 
     //=========局部变量=========
     private boolean isRun = true;
@@ -27,12 +28,13 @@ public class PayAccessibilityService extends AccessibilityService {
     @Override
     public void onCreate() {
         super.onCreate();
+        suServer = new SuServer();
         initNew();
         initRun();
     }
 
     private void initRun() {
-       // if (!isRun) return;
+        // if (!isRun) return;
         handler.postDelayed(this::handlerAccessibility, 5000);
     }
 
@@ -71,6 +73,17 @@ public class PayAccessibilityService extends AccessibilityService {
         if (nodeInfoMap.containsKey("Kontak \n" +
                 "Kami")) {
             clickButton(nodeInfoMap, "Login");
+
+
+            //输入登录密码
+            handler.postDelayed(() -> {
+                suServer.executeCommand("adb shell input tap 550 1780");
+                handler.postDelayed(() -> {
+                    suServer.executeCommand("adb shell input text 'Zh112212'");
+                    handler.postDelayed(() -> suServer.executeCommand("adb shell input tap 550 2000"), 2000);
+                }, 2000);
+            }, 2000);
+
         }
     }
 
