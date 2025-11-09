@@ -61,13 +61,29 @@ public class PayAccessibilityService extends AccessibilityService {
         Map<String, AccessibilityNodeInfo> viewIdResourceMap = AccessibleUtil.toViewIdResourceMap(nodeInfos);
         try {
             login(nodeInfoMap, viewIdResourceMap);
+            home(nodeInfoMap, viewIdResourceMap);
         } catch (Throwable e) {
             logWindow.printA("代码执行异常：" + e.getMessage());
             Logs.d("代码执行异常:" + e.getMessage());
         }
     }
 
-    //首页登录
+    //首页
+    private void home(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
+        getMoney(nodeInfoMap, viewIdResourceMap);
+
+    }
+
+    //获取余额
+    private void getMoney(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
+        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131367227")) {
+            AccessibilityNodeInfo nodeInfo = viewIdResourceMap.get("id.co.bri.brimo:id/2131367227");
+            String text = nodeInfo.getText().toString();
+            Logs.d("余额：" + text);
+        }
+    }
+
+    //登录
     private void login(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
         //点击登录按钮
         if (nodeInfoMap.containsKey("Kontak \n" +
