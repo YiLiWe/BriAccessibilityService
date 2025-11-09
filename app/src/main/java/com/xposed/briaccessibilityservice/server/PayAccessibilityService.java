@@ -7,6 +7,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.xposed.briaccessibilityservice.config.AppConfig;
+import com.xposed.briaccessibilityservice.runnable.PayRunnable;
+import com.xposed.briaccessibilityservice.runnable.response.TakeLatestOrderBean;
 import com.xposed.briaccessibilityservice.server.utils.BillUtils;
 import com.xposed.briaccessibilityservice.utils.AccessibleUtil;
 import com.xposed.briaccessibilityservice.utils.Logs;
@@ -16,8 +18,12 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
+@Setter
+@Getter
 public class PayAccessibilityService extends AccessibilityService {
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -25,15 +31,19 @@ public class PayAccessibilityService extends AccessibilityService {
     private LogWindow logWindow;
     private AppConfig appConfig;
     private SuServer suServer;
+    private TakeLatestOrderBean takeLatestOrderBean;
+    private PayRunnable payRunnable;
 
     //=========局部变量=========
     private boolean isBill = false;
     private boolean isRun = true;
 
+    //=========局部界面信息=======
+    private String balance = "0";
+
     @Override
     public void onCreate() {
         super.onCreate();
-        suServer = new SuServer();
         initNew();
         initRun();
     }
@@ -60,9 +70,6 @@ public class PayAccessibilityService extends AccessibilityService {
 
     private void callAccessibility(List<AccessibilityNodeInfo> nodeInfos) {
         Map<String, AccessibilityNodeInfo> nodeInfoMap = AccessibleUtil.toTextMap(nodeInfos);
-        for (String text : nodeInfoMap.keySet()) {
-            Logs.d(text);
-        }
         Map<String, AccessibilityNodeInfo> viewIdResourceMap = AccessibleUtil.toViewIdResourceMap(nodeInfos);
         try {
             login(nodeInfoMap, viewIdResourceMap);
@@ -83,9 +90,14 @@ public class PayAccessibilityService extends AccessibilityService {
                 BillUtils billEntity = new BillUtils(nodeInfos);
             }
             handler.postDelayed(() -> {
-                AccessibleUtil.performPullDown(PayAccessibilityService.this, 500*2, 1000*2, 2000);
-                isBill = false;
+                if (takeLatestOrderBean == null) AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 800 * 2, 2000);
             }, 2000);
+            isBill = false;
+
+            //前往首页转账
+            if (takeLatestOrderBean != null) {
+                clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362020");
+            }
         }
     }
 
@@ -94,9 +106,11 @@ public class PayAccessibilityService extends AccessibilityService {
     private void home(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
         getMoney(nodeInfoMap, viewIdResourceMap);
 
-        //首页余额，点击查看账单
-        if (isBill) {
-            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131367227")) {
+        //判断是否首页
+        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131367227")) {
+            if (takeLatestOrderBean != null) {//有订单,点击转账
+                clickButton(nodeInfoMap, "Transfer");
+            } else if (isBill) {   //首页余额，点击查看账单
                 clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362021");
             }
         }
@@ -106,8 +120,14 @@ public class PayAccessibilityService extends AccessibilityService {
     private void getMoney(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131367227")) {
             AccessibilityNodeInfo nodeInfo = viewIdResourceMap.get("id.co.bri.brimo:id/2131367227");
-            String text = nodeInfo.getText().toString();
-            Logs.d("余额：" + text);
+            if (nodeInfo != null) {
+                String text = nodeInfo.getText().toString();
+                String numbersOnly = text.replaceAll("[^0-9]", "");
+                if (!numbersOnly.isEmpty()) {
+                    this.balance = numbersOnly;
+                    Logs.d("余额：" + this.balance);
+                }
+            }
             isBill = true;
         }
     }
@@ -130,6 +150,7 @@ public class PayAccessibilityService extends AccessibilityService {
                 }, 2000);
             }, 2000);
 
+
         }
     }
 
@@ -146,12 +167,15 @@ public class PayAccessibilityService extends AccessibilityService {
 
 
     private void initNew() {
+        suServer = new SuServer();
         logWindow = new LogWindow(this);
         appConfig = new AppConfig(this);
         if (appConfig.isConfigValid()) {
             logWindow.printA("配置设置不全");
             isRun = false;
         }
+        payRunnable = new PayRunnable(this);
+        new Thread(payRunnable).start();
     }
 
     @Override
