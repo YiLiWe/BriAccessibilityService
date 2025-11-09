@@ -48,6 +48,10 @@ public class PayAccessibilityService extends AccessibilityService {
         initRun();
     }
 
+    public synchronized void setTakeLatestOrderBean(TakeLatestOrderBean takeLatestOrderBean) {
+        this.takeLatestOrderBean = takeLatestOrderBean;
+    }
+
     private void initRun() {
         // if (!isRun) return;
         handler.postDelayed(this::handlerAccessibility, 5000);
