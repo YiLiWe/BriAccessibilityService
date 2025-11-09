@@ -83,7 +83,7 @@ public class PayAccessibilityService extends AccessibilityService {
                 BillUtils billEntity = new BillUtils(nodeInfos);
             }
             handler.postDelayed(() -> {
-                AccessibleUtil.performPullDown(PayAccessibilityService.this, 550, 1000, 1000);
+                AccessibleUtil.performPullDown(PayAccessibilityService.this, 500*2, 1000*2, 2000);
                 isBill = false;
             }, 2000);
         }
