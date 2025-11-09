@@ -82,6 +82,7 @@ public class PayAccessibilityService extends AccessibilityService {
                     suServer.executeCommand("adb shell input text 'Zh112212'");
                     handler.postDelayed(() -> suServer.executeCommand("adb shell input tap 550 2000"), 2000);
                 }, 2000);
+                logWindow.printA("执行输入登录密码");
             }, 2000);
 
         }
