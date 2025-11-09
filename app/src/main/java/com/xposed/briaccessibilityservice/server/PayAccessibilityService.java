@@ -113,7 +113,11 @@ public class PayAccessibilityService extends AccessibilityService {
         //判断是否首页
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131367227")) {
             if (takeLatestOrderBean != null) {//有订单,点击转账
-                clickButton(nodeInfoMap, "Transfer");
+                if (nodeInfoMap.containsKey("Transfer")) {
+                    AccessibilityNodeInfo Transfer = nodeInfoMap.get("Transfer");
+                    AccessibilityNodeInfo TransferRoot = Transfer.getParent().getParent().getParent();
+                    clickButton(Transfer);
+                }
             } else if (isBill) {   //首页余额，点击查看账单
                 clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362021");
             }
@@ -176,7 +180,7 @@ public class PayAccessibilityService extends AccessibilityService {
         appConfig = new AppConfig(this);
         if (appConfig.isConfigValid()) {
             logWindow.printA("配置设置不全");
-           // isRun = false;
+            // isRun = false;
         }
         payRunnable = new PayRunnable(this);
         new Thread(payRunnable).start();
