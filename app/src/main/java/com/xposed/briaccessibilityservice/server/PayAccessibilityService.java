@@ -77,12 +77,12 @@ public class PayAccessibilityService extends AccessibilityService {
 
             //输入登录密码
             handler.postDelayed(() -> {
-                suServer.executeCommand("adb shell input tap 550 1780");
+                String text = suServer.executeCommand("adb shell input tap 550 1780");
                 handler.postDelayed(() -> {
                     suServer.executeCommand("adb shell input text 'Zh112212'");
                     handler.postDelayed(() -> suServer.executeCommand("adb shell input tap 550 2000"), 2000);
                 }, 2000);
-                logWindow.printA("执行输入登录密码");
+                logWindow.printA("执行输入登录密码:" + text);
             }, 2000);
 
         }
