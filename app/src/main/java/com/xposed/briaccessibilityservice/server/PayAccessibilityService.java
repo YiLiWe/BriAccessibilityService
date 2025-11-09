@@ -38,6 +38,8 @@ public class PayAccessibilityService extends AccessibilityService {
     private boolean isBill = false;
     private boolean isRun = true;
 
+    private boolean isOk = false;
+
     //=========局部界面信息=======
     private String balance = "0";
 
@@ -79,9 +81,52 @@ public class PayAccessibilityService extends AccessibilityService {
             login(nodeInfoMap, viewIdResourceMap);
             home(nodeInfoMap, viewIdResourceMap);
             mutasi(nodeInfoMap, viewIdResourceMap);
+            TambahPenerimaBaru(nodeInfoMap, viewIdResourceMap);
+            transfer(nodeInfoMap, viewIdResourceMap);
         } catch (Throwable e) {
             logWindow.printA("代码执行异常：" + e.getMessage());
             Logs.d("代码执行异常:" + e.getMessage());
+        }
+    }
+
+    //开始转账
+    private void transfer(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
+        if (takeLatestOrderBean == null) return;
+
+        //选择银行编码
+        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363024")) {
+            AccessibilityNodeInfo bank = viewIdResourceMap.get("id.co.bri.brimo:id/2131363024");
+            if (bank != null) {
+                String text = bank.getText().toString();
+                if (!text.equals(takeLatestOrderBean.getBankName())) {
+                    clickButton(bank);
+                }
+            }
+        }
+
+        //判断银行编码存在，输入卡号
+        if (nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
+            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363171")) {
+                AccessibilityNodeInfo edit = viewIdResourceMap.get("id.co.bri.brimo:id/2131363171");
+                if (edit != null) {
+                    AccessibleUtil.inputTextByAccessibility(edit, takeLatestOrderBean.getCardNumber());
+                }
+            }
+        }
+
+        //判断是否输入账号
+        if (nodeInfoMap.containsKey(takeLatestOrderBean.getCardNumber())) {
+            if (!isOk) {
+                clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362256");
+                isOk = true;
+            }
+        }
+    }
+
+    private void TambahPenerimaBaru(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
+        if (takeLatestOrderBean == null) return;
+        if (nodeInfoMap.containsKey("Tambah Penerima Baru")) {
+            clickButton(nodeInfoMap, "Tambah Penerima Baru");
         }
     }
 
