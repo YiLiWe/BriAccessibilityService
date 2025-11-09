@@ -7,6 +7,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.xposed.briaccessibilityservice.config.AppConfig;
+import com.xposed.briaccessibilityservice.server.utils.BillUtils;
 import com.xposed.briaccessibilityservice.utils.AccessibleUtil;
 import com.xposed.briaccessibilityservice.utils.Logs;
 
@@ -26,6 +27,7 @@ public class PayAccessibilityService extends AccessibilityService {
     private SuServer suServer;
 
     //=========局部变量=========
+    private boolean isBill = false;
     private boolean isRun = true;
 
     @Override
@@ -78,41 +80,25 @@ public class PayAccessibilityService extends AccessibilityService {
             AccessibilityNodeInfo list = viewIdResourceMap.get("id.co.bri.brimo:id/2131366272");
             if (list == null) return;
             List<AccessibilityNodeInfo> nodeInfos = list.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131364918");
-            BillEntity billEntity = new BillEntity(nodeInfos);
-            Logs.d(billEntity.toString());
+            BillUtils billEntity = new BillUtils(nodeInfos);
+
+            handler.postDelayed(() -> {
+                AccessibleUtil.performPullDown(PayAccessibilityService.this, 300, 1000, 1000);
+                isBill = false;
+            }, 2000);
         }
     }
 
-    @Data
-    @ToString
-    private class BillEntity {
-        private String name; //Transfer Ke RAGA AJAIBAN via BRImo
-        private String money;//- Rp15.000,00 + Rp500.000,00
-        private String time;//18:28:16 WIB
-
-        public BillEntity(List<AccessibilityNodeInfo> nodeInfos) {
-            for (AccessibilityNodeInfo item : nodeInfos) {
-                name = handlerName(item.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131368916"));
-                money = handlerName(item.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131368297"));
-                time = handlerName(item.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131368697"));
-            }
-        }
-
-        public String handlerName(List<AccessibilityNodeInfo> nodeInfos) {
-            for (AccessibilityNodeInfo accessibilityNodeInfo : nodeInfos) {
-                return accessibilityNodeInfo.getText().toString();
-            }
-            return null;
-        }
-    }
 
     //首页
     private void home(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
         getMoney(nodeInfoMap, viewIdResourceMap);
 
         //首页余额，点击查看账单
-        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131367227")) {
-            clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362021");
+        if (isBill) {
+            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131367227")) {
+                clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362021");
+            }
         }
     }
 
@@ -122,6 +108,7 @@ public class PayAccessibilityService extends AccessibilityService {
             AccessibilityNodeInfo nodeInfo = viewIdResourceMap.get("id.co.bri.brimo:id/2131367227");
             String text = nodeInfo.getText().toString();
             Logs.d("余额：" + text);
+            isBill = true;
         }
     }
 
