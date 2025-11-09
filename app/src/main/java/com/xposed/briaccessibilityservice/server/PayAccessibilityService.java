@@ -176,7 +176,7 @@ public class PayAccessibilityService extends AccessibilityService {
         appConfig = new AppConfig(this);
         if (appConfig.isConfigValid()) {
             logWindow.printA("配置设置不全");
-            isRun = false;
+           // isRun = false;
         }
         payRunnable = new PayRunnable(this);
         new Thread(payRunnable).start();
