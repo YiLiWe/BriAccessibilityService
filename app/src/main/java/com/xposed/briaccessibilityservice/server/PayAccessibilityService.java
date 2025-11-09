@@ -78,10 +78,10 @@ public class PayAccessibilityService extends AccessibilityService {
             //输入登录密码
             handler.postDelayed(() -> {
                 logWindow.printA("执行输入登录密码:");
-                suServer.executeCommand("shell input tap 550 1780");
+                suServer.executeCommand("input tap 550 1780");
                 handler.postDelayed(() -> {
-                    suServer.executeCommand("shell input text 'Zh112212'");
-                    handler.postDelayed(() -> suServer.executeCommand("adb shell input tap 550 2000"), 2000);
+                    suServer.executeCommand("input text 'Zh112212'");
+                    handler.postDelayed(() -> suServer.executeCommand("input tap 550 2000"), 2000);
                 }, 2000);
             }, 2000);
 
