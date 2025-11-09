@@ -81,7 +81,7 @@ public class PayAccessibilityService extends AccessibilityService {
                 suServer.executeCommand("input tap 550 1780");
                 handler.postDelayed(() -> {
                     suServer.executeCommand("input text 'Zh112212'");
-                    handler.postDelayed(() -> suServer.executeCommand("input keyevent 66"), 2000);
+                    handler.postDelayed(() -> suServer.executeCommand("input tap 550 1300"), 2000);
                 }, 2000);
             }, 2000);
 
