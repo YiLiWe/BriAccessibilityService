@@ -276,6 +276,7 @@ public class PayAccessibilityService extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
         if (accessibilityNodeInfo == null) return;
+        if (takeLatestOrderBean == null) return;
         List<AccessibilityNodeInfo> errors = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131366594");
         if (!errors.isEmpty()) {
             for (AccessibilityNodeInfo error : errors) {
