@@ -81,9 +81,20 @@ public class PayAccessibilityService extends AccessibilityService {
             mutasi(nodeInfoMap, viewIdResourceMap);
             TambahPenerimaBaru(nodeInfoMap, viewIdResourceMap);
             transfer(nodeInfoMap, viewIdResourceMap, nodeInfo);
+            backToolbar(nodeInfoMap, viewIdResourceMap, nodeInfo);
         } catch (Throwable e) {
             logWindow.printA("代码执行异常：" + e.getMessage());
             Logs.d("代码执行异常:" + e.getMessage());
+        }
+    }
+
+    private void backToolbar(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap, AccessibilityNodeInfo nodeInfo) {
+        if (takeLatestOrderBean == null) {
+            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366778")) {
+                AccessibilityNodeInfo toolbar = viewIdResourceMap.get("id.co.bri.brimo:id/2131366778");
+                AccessibilityNodeInfo back = toolbar.getChild(0);
+                Logs.d("控件信息:"+back.toString());
+            }
         }
     }
 
