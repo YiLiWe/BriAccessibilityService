@@ -274,30 +274,12 @@ public class AccessibleUtil {
         if (targetNode == null) {
             return;
         }
-        if (!targetNode.isVisibleToUser()) {
-            return;
-        }
-        if (click(targetNode)) {
-            return;
-        }
         Rect bounds = new Rect();
         targetNode.getBoundsInScreen(bounds);
         int x = bounds.centerX();
         int y = bounds.centerY();
 
-        GestureDescription.Builder builder = new GestureDescription.Builder();
-        Path path = new Path();
-        path.moveTo(x, y);
-        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 100));
-        accessibilityService.dispatchGesture(builder.build(), new AccessibilityService.GestureResultCallback() {
-            @Override
-            public void onCompleted(GestureDescription gestureDescription) {
-            }
-
-            @Override
-            public void onCancelled(GestureDescription gestureDescription) {
-            }
-        }, null);
+        AccessibleUtil.simulateClick(accessibilityService, x, y);
     }
 
 
