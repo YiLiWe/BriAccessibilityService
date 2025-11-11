@@ -110,12 +110,20 @@ public class PayAccessibilityService extends AccessibilityService {
 
         //输入银行编码
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366522")) {
-            if (nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {//存在
-                AccessibilityNodeInfo bankInfo = nodeInfoMap.get(takeLatestOrderBean.getBankName());
-                clickButton(bankInfo.getParent().getParent());
-            } else {//不存在
-                AccessibilityNodeInfo input = viewIdResourceMap.get("id.co.bri.brimo:id/2131366522");
-                AccessibleUtil.inputTextByAccessibility(input, takeLatestOrderBean.getBankName());
+            AccessibilityNodeInfo input = viewIdResourceMap.get("id.co.bri.brimo:id/2131366522");
+            AccessibleUtil.inputTextByAccessibility(input, takeLatestOrderBean.getBankName());
+
+            List<AccessibilityNodeInfo> banks = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131368339");
+            List<AccessibilityNodeInfo> bankText = new ArrayList<>();
+            for (AccessibilityNodeInfo bank : banks) {
+                List<AccessibilityNodeInfo> bankTextA = bank.findAccessibilityNodeInfosByText(takeLatestOrderBean.getBankName());
+                bankText.addAll(bankTextA);
+            }
+            for (AccessibilityNodeInfo bank : bankText) {
+                String text = bank.getText().toString();
+                if (text.equals(takeLatestOrderBean.getBankName())) {
+                    clickButton(bank.getParent().getParent());
+                }
             }
         }
 
