@@ -107,15 +107,13 @@ public class PayAccessibilityService extends AccessibilityService {
                 if (edit != null) {
                     AccessibleUtil.inputTextByAccessibility(edit, takeLatestOrderBean.getCardNumber());
                 }
-            } else {//点击银行
-                List<AccessibilityNodeInfo> bank = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131368339");
-                for (AccessibilityNodeInfo info : bank) {
-                    String text = info.getText().toString();
-                    if (text.equals(takeLatestOrderBean.getBankName())) {
-                        clickButton(info.getParent().getParent());
-                    }
-                }
             }
+        }
+
+        //输入银行编码
+        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366508")) {
+            AccessibilityNodeInfo input = viewIdResourceMap.get("id.co.bri.brimo:id/2131366508");
+            AccessibleUtil.inputTextByAccessibility(input, takeLatestOrderBean.getBankName());
         }
 
         //判断是否输入账号
