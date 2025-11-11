@@ -144,7 +144,7 @@ public class PayAccessibilityService extends AccessibilityService {
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
                 AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
                 Logs.d("控件信息:" + button.toString());
-                AccessibleUtil.Click(this,button);
+                AccessibleUtil.ClickX200(this,button);
             }
         }
 
