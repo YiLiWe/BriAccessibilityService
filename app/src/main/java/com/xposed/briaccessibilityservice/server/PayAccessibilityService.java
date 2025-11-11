@@ -161,16 +161,15 @@ public class PayAccessibilityService extends AccessibilityService {
             //输入金额
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363155")) {
                 AccessibilityNodeInfo money = viewIdResourceMap.get("id.co.bri.brimo:id/2131363155");
-                AccessibleUtil.inputTextByAccessibility(money, String.valueOf(takeLatestOrderBean.getAmount()));
-            }
-
-
-            //确认输入金额
-            if (nodeInfoMap.containsKey(String.valueOf(takeLatestOrderBean.getAmount()))) {
-                if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
-                    AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
-                    Logs.d("确认转账:" + button.toString());
-                    AccessibleUtil.ClickX200(this, button);
+                String text = money.getText().toString();
+                if (text.equals("0")) {
+                    AccessibleUtil.inputTextByAccessibility(money, String.valueOf(takeLatestOrderBean.getAmount()));
+                } else {
+                    if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
+                        AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
+                        Logs.d("确认转账:" + button.toString());
+                        AccessibleUtil.ClickX200(this, button);
+                    }
                 }
             }
 
