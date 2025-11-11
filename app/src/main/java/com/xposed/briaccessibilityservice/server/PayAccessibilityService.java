@@ -55,7 +55,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
     private void initRun() {
         // if (!isRun) return;
-        handler.postDelayed(this::handlerAccessibility, 1000);
+        handler.postDelayed(this::handlerAccessibility, 2000);
     }
 
     //定时启动
@@ -152,9 +152,35 @@ public class PayAccessibilityService extends AccessibilityService {
             AccessibilityNodeInfo error = viewIdResourceMap.get("id.co.bri.brimo:id/2131366944");
             logWindow.printA("错误：" + error.getText().toString());
             takeLatestOrderBean = null;
+            return;
         }
 
 
+        //转账界面
+        if (nodeInfoMap.containsKey("Masukkan Nominal")) {
+            //输入金额
+            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363155")) {
+                AccessibilityNodeInfo money = viewIdResourceMap.get("id.co.bri.brimo:id/2131363155");
+                AccessibleUtil.inputTextByAccessibility(money, String.valueOf(takeLatestOrderBean.getAmount()));
+            }
+
+
+            //确认输入金额
+            if (nodeInfoMap.containsKey(String.valueOf(takeLatestOrderBean.getAmount()))) {
+                if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
+                    AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
+                    Logs.d("确认转账:" + button.toString());
+                    AccessibleUtil.ClickX200(this, button);
+                }
+            }
+
+            //错误信息
+            if (nodeInfoMap.containsKey("Saldo Anda tidak cukup")) {
+                logWindow.printA("错误：Saldo Anda tidak cukup");
+                takeLatestOrderBean = null;
+            }
+
+        }
     }
 
 
