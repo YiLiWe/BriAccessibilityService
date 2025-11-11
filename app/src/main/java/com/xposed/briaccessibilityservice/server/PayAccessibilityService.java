@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -142,13 +143,11 @@ public class PayAccessibilityService extends AccessibilityService {
 
         if (nodeInfoMap.containsKey(takeLatestOrderBean.getCardNumber()) && nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
-                Logs.d("点击运行");
                 AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
-                Rect bounds = new Rect();
-                button.getBoundsInScreen(bounds);
-                int x = bounds.centerX();
-                int y = bounds.centerY();
-                suServer.executeCommand(String.format("input tap %s %s",x,y));
+                Logs.d("控件信息:" + button.toString());
+                AccessibilityNodeInfo buttonRoot = button.getParent();
+                Logs.d("控件信息X:" + buttonRoot.toString());
+
             }
         }
 
