@@ -155,6 +155,10 @@ public class PayAccessibilityService extends AccessibilityService {
     private void home(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
         getMoney(nodeInfoMap, viewIdResourceMap);
 
+        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363886")) {
+            clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131363886");
+        }
+
         //判断是否首页
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131367227")) {
             if (takeLatestOrderBean != null) {//有订单,点击转账
