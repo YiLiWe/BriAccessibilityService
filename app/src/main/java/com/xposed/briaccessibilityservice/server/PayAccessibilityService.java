@@ -54,7 +54,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
     private void initRun() {
         // if (!isRun) return;
-        handler.postDelayed(this::handlerAccessibility, 3000);
+        handler.postDelayed(this::handlerAccessibility, 2000);
     }
 
     //定时启动
