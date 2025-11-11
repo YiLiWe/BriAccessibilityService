@@ -81,7 +81,7 @@ public class PayRunnable implements Runnable {
 
     private void stop() {
         try {
-            Thread.sleep(10_000);
+            Thread.sleep(5_000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
