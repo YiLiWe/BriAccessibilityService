@@ -16,11 +16,10 @@ import com.xposed.briaccessibilityservice.utils.Logs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 @Setter
 @Getter
@@ -69,17 +68,17 @@ public class PayAccessibilityService extends AccessibilityService {
         } else {
             List<AccessibilityNodeInfo> nodeInfos = new ArrayList<>();
             AccessibleUtil.getAccessibilityNodeInfoS(nodeInfos, nodeInfo);
-            callAccessibility(nodeInfos);
+            callAccessibility(nodeInfos, nodeInfo);
             initRun();
         }
     }
 
-    private void callAccessibility(List<AccessibilityNodeInfo> nodeInfos) {
+    private void callAccessibility(List<AccessibilityNodeInfo> nodeInfos, AccessibilityNodeInfo nodeInfo) {
         Map<String, AccessibilityNodeInfo> nodeInfoMap = AccessibleUtil.toTextMap(nodeInfos);
         Map<String, AccessibilityNodeInfo> viewIdResourceMap = AccessibleUtil.toViewIdResourceMap(nodeInfos);
         try {
             login(nodeInfoMap, viewIdResourceMap);
-            home(nodeInfoMap, viewIdResourceMap);
+            home(nodeInfoMap, viewIdResourceMap, nodeInfo);
             mutasi(nodeInfoMap, viewIdResourceMap);
             TambahPenerimaBaru(nodeInfoMap, viewIdResourceMap);
             transfer(nodeInfoMap, viewIdResourceMap);
@@ -152,7 +151,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
 
     //首页
-    private void home(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
+    private void home(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap, AccessibilityNodeInfo nodeInfo) {
         getMoney(nodeInfoMap, viewIdResourceMap);
 
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363886")) {
@@ -163,9 +162,13 @@ public class PayAccessibilityService extends AccessibilityService {
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131367227")) {
             if (takeLatestOrderBean != null) {//有订单,点击转账
                 if (nodeInfoMap.containsKey("Transfer")) {
-                    AccessibilityNodeInfo Transfer = nodeInfoMap.get("Transfer");
-                    AccessibilityNodeInfo TransferRoot = Transfer.getParent().getParent().getParent();
-                    clickButton(TransferRoot);
+                    List<AccessibilityNodeInfo> item = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131365888");
+                    item.forEach(accessibilityNodeInfo -> {
+                        List<AccessibilityNodeInfo> transfer = accessibilityNodeInfo.findAccessibilityNodeInfosByText("Transfer");
+                        if (!transfer.isEmpty()) {//点击转账
+                            transfer.forEach(this::clickButton);
+                        }
+                    });
                 }
             } else if (isBill) {   //首页余额，点击查看账单
                 clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362021");
