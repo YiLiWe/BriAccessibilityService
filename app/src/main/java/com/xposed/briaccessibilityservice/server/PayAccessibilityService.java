@@ -128,11 +128,15 @@ public class PayAccessibilityService extends AccessibilityService {
         }
 
         //判断是否输入账号
-        if (nodeInfoMap.containsKey(takeLatestOrderBean.getCardNumber())) {
-            if (!isOk) {
-                clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362256");
-                isOk = true;
-            }
+        if (nodeInfoMap.containsKey(takeLatestOrderBean.getCardNumber()) && nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
+            clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362256");
+        }
+
+
+        //是否账号错误
+        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366944")) {
+            AccessibilityNodeInfo error = viewIdResourceMap.get("id.co.bri.brimo:id/2131366944");
+            logWindow.printA("错误：" + error.getText().toString());
         }
     }
 
