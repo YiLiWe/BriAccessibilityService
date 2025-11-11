@@ -1,6 +1,7 @@
 package com.xposed.briaccessibilityservice.server;
 
 import android.accessibilityservice.AccessibilityService;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.accessibility.AccessibilityEvent;
@@ -143,7 +144,11 @@ public class PayAccessibilityService extends AccessibilityService {
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
                 Logs.d("点击运行");
                 AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
-                AccessibleUtil.Click(this, button);
+                Rect bounds = new Rect();
+                button.getBoundsInScreen(bounds);
+                int x = bounds.centerX();
+                int y = bounds.centerY();
+                suServer.executeCommand(String.format("adb shell input tap %s %s",x,y));
             }
         }
 
