@@ -180,6 +180,11 @@ public class PayAccessibilityService extends AccessibilityService {
             }
 
         }
+
+        //确认账单
+        if (nodeInfoMap.containsKey("Konfirmasi")) {
+            clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131366895");
+        }
     }
 
 
