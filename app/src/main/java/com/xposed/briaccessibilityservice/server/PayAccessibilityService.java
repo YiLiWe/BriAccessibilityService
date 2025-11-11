@@ -30,7 +30,6 @@ public class PayAccessibilityService extends AccessibilityService {
     //=========实体类==========
     private LogWindow logWindow;
     private AppConfig appConfig;
-    private SuServer suServer;
     private TakeLatestOrderBean takeLatestOrderBean;
     private PayRunnable payRunnable;
 
@@ -92,9 +91,9 @@ public class PayAccessibilityService extends AccessibilityService {
 
     private void backToolbar(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap, AccessibilityNodeInfo nodeInfo) {
         if (takeLatestOrderBean == null) {
-            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366778")) {
-                AccessibilityNodeInfo toolbar = viewIdResourceMap.get("id.co.bri.brimo:id/2131366778");
-                AccessibilityNodeInfo back = toolbar.getChild(0);
+            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366895")) {
+                AccessibilityNodeInfo toolbar = viewIdResourceMap.get("id.co.bri.brimo:id/2131366895");
+                AccessibilityNodeInfo back = toolbar.getParent().getChild(0);
                 clickButton(back);
             }
         }
@@ -144,7 +143,7 @@ public class PayAccessibilityService extends AccessibilityService {
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
                 AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
                 Logs.d("控件信息:" + button.toString());
-                AccessibleUtil.ClickX200(this,button);
+                AccessibleUtil.ClickX200(this, button);
             }
         }
 
@@ -157,7 +156,6 @@ public class PayAccessibilityService extends AccessibilityService {
 
 
     }
-
 
 
     private void TambahPenerimaBaru(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
@@ -264,7 +262,6 @@ public class PayAccessibilityService extends AccessibilityService {
 
 
     private void initNew() {
-        suServer = new SuServer();
         logWindow = new LogWindow(this);
         appConfig = new AppConfig(this);
         if (appConfig.isConfigValid()) {
@@ -290,6 +287,5 @@ public class PayAccessibilityService extends AccessibilityService {
         super.onDestroy();
         isRun = false;
         logWindow.destroy();
-        suServer.closeSession();
     }
 }
