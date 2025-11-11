@@ -197,8 +197,12 @@ public class PayAccessibilityService extends AccessibilityService {
                 AccessibilityNodeInfo accessibilityNodeInfo = viewIdResourceMap.get("id.co.bri.brimo:id/2131363182");
                 AccessibleUtil.inputTextByAccessibility(accessibilityNodeInfo, pass);
             }
-        } else if (nodeInfoMap.containsKey(pass)) {//点击登录
-            clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362361");
+        }
+        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362361")) {//点击登录
+            AccessibilityNodeInfo login = viewIdResourceMap.get("id.co.bri.brimo:id/2131362361");
+            if (login.isEnabled()) {
+                clickButton(login);
+            }
         }
     }
 
