@@ -129,6 +129,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
         //判断是否输入账号
         if (nodeInfoMap.containsKey(takeLatestOrderBean.getCardNumber()) && nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
+            Logs.d("点击运行");
             clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362256");
         }
 
