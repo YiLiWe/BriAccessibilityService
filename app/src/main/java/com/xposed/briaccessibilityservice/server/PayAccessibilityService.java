@@ -187,23 +187,18 @@ public class PayAccessibilityService extends AccessibilityService {
 
     //登录
     private void login(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
+        String pass = "Zh112212";
         //点击登录按钮
         if (nodeInfoMap.containsKey("Kontak \n" +
                 "Kami")) {
             clickButton(nodeInfoMap, "Login");
-
-
-            //输入登录密码
-            handler.postDelayed(() -> {
-                logWindow.printA("执行输入登录密码:");
-                suServer.executeCommand("input tap 550 1780");
-                handler.postDelayed(() -> {
-                    suServer.executeCommand("input text 'Zh112212'");
-                    handler.postDelayed(() -> suServer.executeCommand("input tap 550 1350"), 2000);
-                }, 2000);
-            }, 2000);
-
-
+        } else if (nodeInfoMap.containsKey("Lupa Username/Password? ")) {//弹窗登录
+            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363182")) {
+                AccessibilityNodeInfo accessibilityNodeInfo = viewIdResourceMap.get("id.co.bri.brimo:id/2131363182");
+                AccessibleUtil.inputTextByAccessibility(accessibilityNodeInfo, pass);
+            }
+        } else if (nodeInfoMap.containsKey(pass)) {//点击登录
+            clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362361");
         }
     }
 
