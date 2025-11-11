@@ -154,7 +154,11 @@ public class PayAccessibilityService extends AccessibilityService {
             logWindow.printA("错误：" + error.getText().toString());
             takeLatestOrderBean = null;
         }
+
+
     }
+
+
 
     private void TambahPenerimaBaru(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
         if (takeLatestOrderBean == null) return;
