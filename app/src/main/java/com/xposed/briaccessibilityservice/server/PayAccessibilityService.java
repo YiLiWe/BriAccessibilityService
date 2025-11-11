@@ -104,9 +104,7 @@ public class PayAccessibilityService extends AccessibilityService {
         if (nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363171")) {//确认银行输入
                 AccessibilityNodeInfo edit = viewIdResourceMap.get("id.co.bri.brimo:id/2131363171");
-                if (edit != null) {
-                    AccessibleUtil.inputTextByAccessibility(edit, takeLatestOrderBean.getCardNumber());
-                }
+                AccessibleUtil.inputTextByAccessibility(edit, takeLatestOrderBean.getCardNumber());
             }
         }
 
