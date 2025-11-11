@@ -148,7 +148,7 @@ public class PayAccessibilityService extends AccessibilityService {
                 button.getBoundsInScreen(bounds);
                 int x = bounds.centerX();
                 int y = bounds.centerY();
-                suServer.executeCommand(String.format("adb shell input tap %s %s",x,y));
+                suServer.executeCommand(String.format("input tap %s %s",x,y));
             }
         }
 
