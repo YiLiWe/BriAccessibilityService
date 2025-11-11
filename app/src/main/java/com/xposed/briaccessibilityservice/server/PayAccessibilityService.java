@@ -131,6 +131,7 @@ public class PayAccessibilityService extends AccessibilityService {
             Logs.d("点击运行");
             AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
             if (button.isEnabled()) {
+                Logs.d("点击运行X");
                 clickButton(button);
             }
         }
