@@ -74,6 +74,7 @@ public class PayAccessibilityService extends AccessibilityService {
     }
 
     private void callAccessibility(List<AccessibilityNodeInfo> nodeInfos, AccessibilityNodeInfo nodeInfo) {
+        Logs.d("数量：" + nodeInfos.size());
         Map<String, AccessibilityNodeInfo> nodeInfoMap = AccessibleUtil.toTextMap(nodeInfos);
         Map<String, AccessibilityNodeInfo> viewIdResourceMap = AccessibleUtil.toViewIdResourceMap(nodeInfos);
         try {
