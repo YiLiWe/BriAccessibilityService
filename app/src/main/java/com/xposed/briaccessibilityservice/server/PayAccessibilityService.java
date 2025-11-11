@@ -127,13 +127,12 @@ public class PayAccessibilityService extends AccessibilityService {
             }
         }
 
-        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
-            Logs.d("点击运行");
-            AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
-            Logs.d(button.toString());
-            if (button.isEnabled()) {
-                Logs.d("点击运行X");
-                clickButton(button);
+
+        if (nodeInfoMap.containsKey(takeLatestOrderBean.getCardNumber()) && nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
+            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
+                Logs.d("点击运行");
+                AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
+                AccessibleUtil.Click(this, button);
             }
         }
 
