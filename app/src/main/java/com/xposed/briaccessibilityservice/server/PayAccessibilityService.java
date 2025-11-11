@@ -54,7 +54,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
     private void initRun() {
         // if (!isRun) return;
-        handler.postDelayed(this::handlerAccessibility, 5000);
+        handler.postDelayed(this::handlerAccessibility, 3000);
     }
 
     //定时启动
@@ -127,12 +127,13 @@ public class PayAccessibilityService extends AccessibilityService {
             }
         }
 
-        //判断是否输入账号
-        if (nodeInfoMap.containsKey(takeLatestOrderBean.getCardNumber()) && nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
+        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
             Logs.d("点击运行");
-            clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362256");
+            AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
+            if (button.isEnabled()) {
+                clickButton(button);
+            }
         }
-
 
         //是否账号错误
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366944")) {
