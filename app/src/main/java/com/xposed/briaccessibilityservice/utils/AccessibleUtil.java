@@ -295,13 +295,13 @@ public class AccessibleUtil {
     public static void simulateRealisticClick(AccessibilityService service, float x, float y) {
         // 1. 添加随机偏移（±5像素）
         Random random = new Random();
-        float offsetX = random.nextFloat() * 10 - 5; // [-5, 5]
+        float offsetX = random.nextFloat() * 100 - 20; // [-5, 5]
         float offsetY = random.nextFloat() * 10 - 5; // [-5, 5]
         Path path = new Path();
         path.moveTo(x + offsetX, y + offsetY);
 
         // 2. 随机化点击时长（50-200ms）
-        int duration = 50 + random.nextInt(150);
+        int duration = 200 + random.nextInt(1000);
 
         // 3. 构建手势
         GestureDescription gestureDescription = new GestureDescription.Builder()
