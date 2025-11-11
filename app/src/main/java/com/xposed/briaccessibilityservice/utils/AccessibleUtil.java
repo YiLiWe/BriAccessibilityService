@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class AccessibleUtil {
 
@@ -279,7 +280,7 @@ public class AccessibleUtil {
         int x = bounds.centerX();
         int y = bounds.centerY();
         Logs.d("点击坐标:"+x+" Y:"+y);
-        AccessibleUtil.simulateClick(accessibilityService, x, y);
+        AccessibleUtil.simulateRealisticClick(accessibilityService, x, y);
     }
 
 
@@ -290,6 +291,27 @@ public class AccessibleUtil {
         GestureDescription gestureDescription = builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 100)).build();
         service.dispatchGesture(gestureDescription, null, null);
     }
+
+    public static void simulateRealisticClick(AccessibilityService service, float x, float y) {
+        // 1. 添加随机偏移（±5像素）
+        Random random = new Random();
+        float offsetX = random.nextFloat() * 10 - 5; // [-5, 5]
+        float offsetY = random.nextFloat() * 10 - 5; // [-5, 5]
+        Path path = new Path();
+        path.moveTo(x + offsetX, y + offsetY);
+
+        // 2. 随机化点击时长（50-200ms）
+        int duration = 50 + random.nextInt(150);
+
+        // 3. 构建手势
+        GestureDescription gestureDescription = new GestureDescription.Builder()
+                .addStroke(new GestureDescription.StrokeDescription(path, 0, duration))
+                .build();
+
+        // 4. 分发手势
+        service.dispatchGesture(gestureDescription, null, null);
+    }
+
 
 
     private static boolean click(AccessibilityNodeInfo it) {
