@@ -278,7 +278,7 @@ public class AccessibleUtil {
         targetNode.getBoundsInScreen(bounds);
         int x = bounds.centerX();
         int y = bounds.centerY();
-
+        Logs.d("点击坐标:"+x+" Y:"+y);
         AccessibleUtil.simulateClick(accessibilityService, x, y);
     }
 

@@ -94,7 +94,6 @@ public class PayAccessibilityService extends AccessibilityService {
                 AccessibilityNodeInfo toolbar = viewIdResourceMap.get("id.co.bri.brimo:id/2131366778");
                 AccessibilityNodeInfo back = toolbar.getChild(0);
                 clickButton(back);
-                Logs.d("控件信息:" + back.toString());
             }
         }
     }
