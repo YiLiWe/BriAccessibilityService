@@ -16,7 +16,6 @@ import com.xposed.briaccessibilityservice.utils.Logs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -81,7 +80,7 @@ public class PayAccessibilityService extends AccessibilityService {
             home(nodeInfoMap, viewIdResourceMap, nodeInfo);
             mutasi(nodeInfoMap, viewIdResourceMap);
             TambahPenerimaBaru(nodeInfoMap, viewIdResourceMap);
-            transfer(nodeInfoMap, viewIdResourceMap);
+            transfer(nodeInfoMap, viewIdResourceMap, nodeInfo);
         } catch (Throwable e) {
             logWindow.printA("代码执行异常：" + e.getMessage());
             Logs.d("代码执行异常:" + e.getMessage());
@@ -89,26 +88,32 @@ public class PayAccessibilityService extends AccessibilityService {
     }
 
     //开始转账
-    private void transfer(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
+    private void transfer(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap, AccessibilityNodeInfo nodeInfo) {
         if (takeLatestOrderBean == null) return;
 
-        //选择银行编码
+        //点击选择银行编码
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363024")) {
             AccessibilityNodeInfo bank = viewIdResourceMap.get("id.co.bri.brimo:id/2131363024");
-            if (bank != null) {
-                String text = bank.getText().toString();
-                if (!text.equals(takeLatestOrderBean.getBankName())) {
-                    clickButton(bank);
-                }
+            String text = bank.getText().toString();
+            if (!text.equals(takeLatestOrderBean.getBankName())) {
+                clickButton(bank);
             }
         }
 
         //判断银行编码存在，输入卡号
         if (nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
-            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363171")) {
+            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363171")) {//确认银行输入
                 AccessibilityNodeInfo edit = viewIdResourceMap.get("id.co.bri.brimo:id/2131363171");
                 if (edit != null) {
                     AccessibleUtil.inputTextByAccessibility(edit, takeLatestOrderBean.getCardNumber());
+                }
+            } else {//点击银行
+                List<AccessibilityNodeInfo> bank = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131368339");
+                for (AccessibilityNodeInfo info : bank) {
+                    String text = info.getText().toString();
+                    if (text.equals(takeLatestOrderBean.getBankName())) {
+                        clickButton(info.getParent().getParent());
+                    }
                 }
             }
         }

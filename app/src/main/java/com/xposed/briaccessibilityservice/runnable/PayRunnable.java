@@ -70,6 +70,7 @@ public class PayRunnable implements Runnable {
             stop();
             TakeLatestOrderBean takeLatestOrderBean = new TakeLatestOrderBean();
             takeLatestOrderBean.setOrderNo("d66d6dd");
+            takeLatestOrderBean.setBankName("BANK BNI");
             takeLatestOrderBean.setAmount(6666);
             service.getLogWindow().print("获取到订单:" + takeLatestOrderBean.getOrderNo());
             service.setOk(false);
