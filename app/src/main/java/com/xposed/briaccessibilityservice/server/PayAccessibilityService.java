@@ -140,7 +140,7 @@ public class PayAccessibilityService extends AccessibilityService {
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366944")) {
             AccessibilityNodeInfo error = viewIdResourceMap.get("id.co.bri.brimo:id/2131366944");
             logWindow.printA("错误：" + error.getText().toString());
-            
+            takeLatestOrderBean = null;
         }
     }
 
