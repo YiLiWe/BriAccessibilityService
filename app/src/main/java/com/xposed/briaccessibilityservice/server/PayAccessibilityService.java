@@ -166,7 +166,7 @@ public class PayAccessibilityService extends AccessibilityService {
                     item.forEach(accessibilityNodeInfo -> {
                         List<AccessibilityNodeInfo> transfer = accessibilityNodeInfo.findAccessibilityNodeInfosByText("Transfer");
                         if (!transfer.isEmpty()) {//点击转账
-                            transfer.forEach(this::clickButton);
+                            clickButton(accessibilityNodeInfo);
                         }
                     });
                 }
