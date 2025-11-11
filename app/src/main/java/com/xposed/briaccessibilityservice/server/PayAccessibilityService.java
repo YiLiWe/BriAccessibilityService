@@ -183,12 +183,14 @@ public class PayAccessibilityService extends AccessibilityService {
 
         //确认账单
         if (nodeInfoMap.containsKey("Konfirmasi")) {
+            Logs.d("进入");
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366895")) {
                 AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131366895");
                 Logs.d("确认转账账单:" + button.toString());
                 AccessibleUtil.ClickX200(this, button);
             }
         }
+
     }
 
 
