@@ -439,11 +439,25 @@ public class PayAccessibilityService extends AccessibilityService {
                 AccessibilityNodeInfo nodeInfo1 = nodeInfoMap.get(charAsString);
                 clickButton(nodeInfo1);
             }
-            if (takeLatestOrderBean != null) {
-                success(takeLatestOrderBean);
-            } else if (collectBillResponse != null) {
-                success(collectBillResponse);
+        }
+
+        if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131368710")) {
+            AccessibilityNodeInfo nodeInfo1 = viewIdResourceMap.get("id.co.bri.brimo:id/2131368710");
+            String text = nodeInfo1.getText().toString();
+            if (text.equals("Transaksi Berhasil")) {
+                if (takeLatestOrderBean != null) {
+                    success(takeLatestOrderBean);
+                } else if (collectBillResponse != null) {
+                    success(collectBillResponse);
+                }
+            } else {
+                if (takeLatestOrderBean != null) {
+                    error(text, takeLatestOrderBean);
+                } else if (collectBillResponse != null) {
+                    error(text, collectBillResponse);
+                }
             }
+            clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362212");
         }
     }
 
