@@ -65,9 +65,9 @@ public class PayAccessibilityService extends AccessibilityService {
     @Override
     public void onCreate() {
         super.onCreate();
-        logWindow.printA("收款(付款)服务V" + DeviceUtils.getVerName(this));
         initNew();
         initRun();
+        logWindow.printA("收款(付款)服务V" + DeviceUtils.getVerName(this));
     }
 
     public synchronized void setTakeLatestOrderBean(TakeLatestOrderBean takeLatestOrderBean) {
