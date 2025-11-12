@@ -141,6 +141,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
     //转账失败
     private void error(String error, TakeLatestOrderBean takeLatestOrderBean) {
+        if (error.equals("5 Cara Jadi Sultan Tanpa Warisan"))return;
         logWindow.printA("错误：" + error);
         Logs.d("错误:" + error);
         PullPost(0, error, takeLatestOrderBean);
@@ -167,6 +168,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
     //归集失败
     private void error(String text, CollectBillResponse collectBillResponse) {
+        if (text.equals("5 Cara Jadi Sultan Tanpa Warisan"))return;
         postCollectStatus(2, text, collectBillResponse.getId());
         setCollectBillResponse(null);
         balance = "0";
