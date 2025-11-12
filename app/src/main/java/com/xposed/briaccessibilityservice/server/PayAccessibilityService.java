@@ -418,7 +418,7 @@ public class PayAccessibilityService extends AccessibilityService {
         List<BillEntity> billEntities = new ArrayList<>();
         for (BillUtils.BillEntity billEntity : billUtils.getBillEntities()) {
             if (dao.countByText(billEntity.toString()) > 0) continue;
-            if (billEntity.getMoney() == null) return;
+            if (billEntity.getMoney() == null) continue;
             if (billEntity.getMoney().contains("+")) {
                 BillEntity bill = new BillEntity();
                 bill.setState(0);
