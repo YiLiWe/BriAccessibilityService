@@ -31,7 +31,7 @@ import okhttp3.ResponseBody;
 public class PayRunnable implements Runnable {
     private final PayAccessibilityService service;
     private final AppConfig appConfig;
-    private final List<String> Banks = List.of("GOPAY", "OVO", "SHOPEEPAY", "DANA", "LINKAJA");
+    private final List<String> Banks = List.of("Gopay Customer", "OVO", "ShopeePay", "DANA", "LinkAja");
     private final Map<String, String> Banks2 = new HashMap<>() {
         {
             put("OVO", "OVO");
@@ -98,52 +98,8 @@ public class PayRunnable implements Runnable {
             takeLatestOrderBean1.setBankName(getBank(takeLatestOrderBean1.getBankName()));
         } else {
             takeLatestOrderBean1.setMoney(false);
-            if (!BankUtils.getBankMap().containsKey(takeLatestOrderBean1.getBankName())) {
-                PullPost(0, "bank name error", takeLatestOrderBean1);
-                return null;
-            } else {
-                String bank = BankUtils.getBankMap().get(takeLatestOrderBean1.getBankName());
-                takeLatestOrderBean1.setBankName(bank);
-            }
         }
         return takeLatestOrderBean1;
-    }
-
-    public void PullPost(int state, String error, TakeLatestOrderBean transferBean) {
-        if (transferBean == null) return;
-        FormBody.Builder requestBody = new FormBody.Builder();
-        if (error.equals("Transaction in Progress")) {
-            state = 1;
-        }
-        if (state == 1) {
-            requestBody.add("paymentCertificate", "Transaction Successful");
-            Logs.d(transferBean.getOrderNo() + "转账完毕，结果:成功");
-        } else {
-            Logs.d(transferBean.getOrderNo() + "转账完毕，结果:失败 原因:" + error);
-        }
-        requestBody.add("state", String.valueOf(state));
-        String timeStr = new android.icu.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINESE).format(System.currentTimeMillis());
-        requestBody.add("paymentTime", timeStr);
-        requestBody.add("failReason", error);
-        requestBody.add("amount", String.valueOf(transferBean.getAmount()));
-        requestBody.add("orderNo", transferBean.getOrderNo());
-        Request request = new Request.Builder()
-                .post(requestBody.build())
-                .url(appConfig.getPayUrl() + "app/payoutOrderCallback")
-                .build();
-        OkHttpClient client = new OkHttpClient();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                call.clone();
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                response.close();
-                call.clone();
-            }
-        });
     }
 
     private String getBank(String key) {

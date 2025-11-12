@@ -3,21 +3,16 @@ package com.xposed.briaccessibilityservice.runnable;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import androidx.annotation.NonNull;
-
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.xposed.briaccessibilityservice.runnable.response.CollectBillResponse;
 import com.xposed.briaccessibilityservice.runnable.response.ResultResponse;
 import com.xposed.briaccessibilityservice.server.PayAccessibilityService;
-import com.xposed.briaccessibilityservice.utils.BankUtils;
 import com.xposed.briaccessibilityservice.utils.Logs;
 
 import java.io.IOException;
 
 import lombok.Getter;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -60,18 +55,12 @@ public class CollectionAccessibilityRunnable implements Runnable {
                 stop();
                 continue;
             }
-            if (service.getTakeLatestOrderBean()!=null){
+            if (service.getTakeLatestOrderBean() != null) {
                 stop();
                 continue;
             }
             CollectBillResponse collectBillResponse = getCollectBean();
             if (collectBillResponse != null) {
-                if (!BankUtils.getBankMap().containsKey(collectBillResponse.getBank())) {
-                    postCollectStatus(2, "不支持该银行", collectBillResponse.getId());
-                } else {
-                    String bank = BankUtils.getBankMap().get(collectBillResponse.getBank());
-                    collectBillResponse.setBank(bank);
-                }
                 service.getLogWindow().print("归集账单成功:" + collectBillResponse.getId());
                 service.setCollectBillResponse(collectBillResponse);
             }
@@ -79,24 +68,6 @@ public class CollectionAccessibilityRunnable implements Runnable {
         }
     }
 
-
-    private void postCollectStatus(int state, String error, long id) {
-        OkHttpClient okHttpClient = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(String.format("%sv1/collectStatus?id=%s&state=%s&error=%s", collectUrl, id, state, error))
-                .build();
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                call.clone();
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                response.close();
-            }
-        });
-    }
 
     private void stop() {
         try {

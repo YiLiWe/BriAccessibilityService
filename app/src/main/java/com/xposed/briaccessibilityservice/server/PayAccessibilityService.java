@@ -222,6 +222,62 @@ public class PayAccessibilityService extends AccessibilityService {
     private void transfer(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap, AccessibilityNodeInfo nodeInfo) {
         if (takeLatestOrderBean == null && collectBillResponse == null) return;
 
+        //钱包转账
+        if (takeLatestOrderBean != null && takeLatestOrderBean.isMoney()) {
+            if (nodeInfoMap.containsKey("E Wallet")) {
+                AccessibilityNodeInfo wallet = nodeInfoMap.get("E Wallet");
+                clickButton(wallet.getParent());
+            }
+
+            //选择钱包
+            if (nodeInfoMap.containsKey("Pilih E Wallet")) {
+                List<AccessibilityNodeInfo> bank = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131365007");
+                for (AccessibilityNodeInfo nodeInfo1 : bank) {
+                    List<AccessibilityNodeInfo> nodeInfos = nodeInfo1.findAccessibilityNodeInfosByText(takeLatestOrderBean.getBankName());
+                    if (nodeInfos.isEmpty()) continue;
+                    clickButton(nodeInfo1);
+                }
+            }
+
+            //输入卡号
+            if (nodeInfoMap.containsKey("Input Nomor")) {
+                if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363077")) {
+                    AccessibilityNodeInfo edit = viewIdResourceMap.get("id.co.bri.brimo:id/2131363077");
+                    AccessibleUtil.inputTextByAccessibility(edit, takeLatestOrderBean.getCardNumber());
+                }
+            }
+
+            //确认
+            if (nodeInfoMap.containsKey(takeLatestOrderBean.getCardNumber())) {
+                clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362140");
+            }
+
+            //输入金额
+            if (nodeInfoMap.containsKey("Nominal")) {
+                if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363155")) {
+                    AccessibilityNodeInfo edit = viewIdResourceMap.get("id.co.bri.brimo:id/2131363155");
+                    AccessibleUtil.inputTextByAccessibility(edit, String.valueOf(takeLatestOrderBean.getAmount()));
+
+                }
+            }
+
+            //判断是否输入金额
+            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363155")) {
+                AccessibilityNodeInfo edit = viewIdResourceMap.get("id.co.bri.brimo:id/2131363155");
+                String text = edit.getText().toString();
+                if (!text.equals("0")) {
+                    if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362282")) {
+                        clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362282");
+                    }
+                }
+            }
+
+            //确认转账
+            if (nodeInfoMap.containsKey("Konfirmasi")) {
+                clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362129");
+            }
+        }
+
         //点击选择银行编码
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363024")) {
             AccessibilityNodeInfo bank = viewIdResourceMap.get("id.co.bri.brimo:id/2131363024");
@@ -452,7 +508,25 @@ public class PayAccessibilityService extends AccessibilityService {
         //判断是否首页
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131367227")) {
             if (takeLatestOrderBean != null || collectBillResponse != null) {//有订单,点击转账
-                if (nodeInfoMap.containsKey("Transfer")) {
+                if (takeLatestOrderBean != null) {
+                    if (takeLatestOrderBean.isMoney() && nodeInfoMap.containsKey("Top Up")) {//钱包转账
+                        List<AccessibilityNodeInfo> item = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131365888");
+                        item.forEach(accessibilityNodeInfo -> {
+                            List<AccessibilityNodeInfo> transfer = accessibilityNodeInfo.findAccessibilityNodeInfosByText("Top Up");
+                            if (!transfer.isEmpty()) {//点击转账
+                                clickButton(accessibilityNodeInfo);
+                            }
+                        });
+                    } else if (nodeInfoMap.containsKey("Transfer")) {//普通转账
+                        List<AccessibilityNodeInfo> item = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131365888");
+                        item.forEach(accessibilityNodeInfo -> {
+                            List<AccessibilityNodeInfo> transfer = accessibilityNodeInfo.findAccessibilityNodeInfosByText("Transfer");
+                            if (!transfer.isEmpty()) {//点击转账
+                                clickButton(accessibilityNodeInfo);
+                            }
+                        });
+                    }
+                } else if (nodeInfoMap.containsKey("Transfer")) {
                     List<AccessibilityNodeInfo> item = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131365888");
                     item.forEach(accessibilityNodeInfo -> {
                         List<AccessibilityNodeInfo> transfer = accessibilityNodeInfo.findAccessibilityNodeInfosByText("Transfer");
@@ -461,6 +535,7 @@ public class PayAccessibilityService extends AccessibilityService {
                         }
                     });
                 }
+
             } else if (isBill) {   //首页余额，点击查看账单
                 clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362021");
             }
