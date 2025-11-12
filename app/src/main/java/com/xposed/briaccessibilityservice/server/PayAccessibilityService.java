@@ -67,6 +67,7 @@ public class PayAccessibilityService extends AccessibilityService {
         super.onCreate();
         initNew();
         initRun();
+        handler.postDelayed(this::refresh, 10_000);
         logWindow.printA("收款(付款)服务V" + DeviceUtils.getVerName(this));
     }
 
@@ -81,7 +82,6 @@ public class PayAccessibilityService extends AccessibilityService {
     private void initRun() {
         if (!isRun) return;
         handler.postDelayed(this::handlerAccessibility, 2000);
-        handler.postDelayed(this::refresh, 10000);
     }
 
     private void refresh() {
@@ -95,7 +95,7 @@ public class PayAccessibilityService extends AccessibilityService {
                 }
             }
         }
-        handler.postDelayed(this::refresh, 10000);
+        handler.postDelayed(this::refresh, 10_000);
     }
 
     //定时启动
