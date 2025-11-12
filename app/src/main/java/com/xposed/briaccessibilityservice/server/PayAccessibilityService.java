@@ -282,7 +282,9 @@ public class PayAccessibilityService extends AccessibilityService {
                 String text = edit.getText().toString();
                 if (!text.equals("0")) {
                     if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362282")) {
-                        clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362282");
+                        AccessibilityNodeInfo nodeInfo1 = viewIdResourceMap.get("id.co.bri.brimo:id/2131362282");
+                        AccessibleUtil.Click(this, nodeInfo1);
+                        Logs.d("点击确认输入金额");
                     }
                 }
             }
