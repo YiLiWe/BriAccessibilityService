@@ -435,7 +435,7 @@ public class PayAccessibilityService extends AccessibilityService {
         }
 
         //转账成功
-        if (viewIdResourceMap.containsKey("Transaksi Berhasil")&&viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362212")){
+        if (nodeInfoMap.containsKey("Transaksi Berhasil")&&viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362212")){
             if (takeLatestOrderBean != null) {
                 success(takeLatestOrderBean);
             } else if (collectBillResponse != null) {
