@@ -91,6 +91,7 @@ public class PayAccessibilityService extends AccessibilityService {
             if (!nodeInfos.isEmpty()) {//账单父类
                 if (takeLatestOrderBean == null && collectBillResponse == null) {
                     AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 900 * 2, 1000);
+                    Logs.d("触发下拉");
                 }
             }
         }
@@ -464,14 +465,12 @@ public class PayAccessibilityService extends AccessibilityService {
                 handlerData(billEntity);
             }
             isBill = false;
-
             //前往首页转账
             if (takeLatestOrderBean != null) {
                 clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362020");
             } else if (collectBillResponse != null) {
                 clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362020");
             }
-
         }
     }
 
