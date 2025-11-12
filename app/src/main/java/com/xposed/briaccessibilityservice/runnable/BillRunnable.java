@@ -52,9 +52,11 @@ public class BillRunnable implements Runnable {
                 .url(text)
                 .build();
         try (Response response = okHttpClient.newCall(request).execute()) {
-            Logs.d("响应码:"+response.code());
+            Logs.d("响应码:" + response.code());
             if (response.isSuccessful()) {
                 billDao.updateStateById(billEntity.getUid(), 1);
+            } else {
+                billDao.updateStateById(billEntity.getUid(), 0);
             }
             try (ResponseBody body = response.body()) {
                 if (body == null) return;
