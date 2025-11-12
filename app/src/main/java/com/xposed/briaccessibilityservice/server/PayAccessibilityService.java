@@ -434,7 +434,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131368710")) {
             AccessibilityNodeInfo nodeInfo1 = viewIdResourceMap.get("id.co.bri.brimo:id/2131368710");
-            if (nodeInfo1 != null) {
+            if (nodeInfo1 != null && nodeInfo1.getText() != null) {
                 String text = nodeInfo1.getText().toString();
                 if (text.equals("Transaksi Berhasil")) {
                     if (takeLatestOrderBean != null) {
