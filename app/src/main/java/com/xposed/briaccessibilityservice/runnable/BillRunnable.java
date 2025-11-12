@@ -65,6 +65,7 @@ public class BillRunnable implements Runnable {
             }
         } catch (IOException e) {
             billDao.updateStateById(billEntity.getUid(), 0);
+            e.printStackTrace();
         }
     }
 }
