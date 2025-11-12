@@ -110,6 +110,7 @@ public class PayAccessibilityService extends AccessibilityService {
             backToolbar(nodeInfoMap, viewIdResourceMap, nodeInfo);
         } catch (Throwable e) {
             Logs.d("代码执行异常:" + e.getMessage());
+            e.printStackTrace();
         }
     }
 
