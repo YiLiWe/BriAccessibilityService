@@ -1,26 +1,43 @@
 package com.xposed.briaccessibilityservice.server;
 
 import android.accessibilityservice.AccessibilityService;
-import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
+import android.text.format.DateFormat;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import androidx.annotation.NonNull;
+
 import com.xposed.briaccessibilityservice.config.AppConfig;
+import com.xposed.briaccessibilityservice.room.AppDatabase;
+import com.xposed.briaccessibilityservice.room.dao.BillDao;
+import com.xposed.briaccessibilityservice.room.entity.BillEntity;
+import com.xposed.briaccessibilityservice.runnable.BillRunnable;
+import com.xposed.briaccessibilityservice.runnable.CollectionAccessibilityRunnable;
 import com.xposed.briaccessibilityservice.runnable.PayRunnable;
+import com.xposed.briaccessibilityservice.runnable.response.CollectBillResponse;
 import com.xposed.briaccessibilityservice.runnable.response.TakeLatestOrderBean;
 import com.xposed.briaccessibilityservice.server.utils.BillUtils;
 import com.xposed.briaccessibilityservice.utils.AccessibleUtil;
+import com.xposed.briaccessibilityservice.utils.DeviceUtils;
 import com.xposed.briaccessibilityservice.utils.Logs;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 @Setter
 @Getter
@@ -31,7 +48,10 @@ public class PayAccessibilityService extends AccessibilityService {
     private LogWindow logWindow;
     private AppConfig appConfig;
     private TakeLatestOrderBean takeLatestOrderBean;
+    private CollectBillResponse collectBillResponse;
     private PayRunnable payRunnable;
+    private BillRunnable billRunnable;
+    private CollectionAccessibilityRunnable collectionAccessibilityRunnable;
 
     //=========局部变量=========
     private boolean isBill = false;
@@ -45,6 +65,7 @@ public class PayAccessibilityService extends AccessibilityService {
     @Override
     public void onCreate() {
         super.onCreate();
+        logWindow.printA("收款(付款)服务V" + DeviceUtils.getVerName(this));
         initNew();
         initRun();
     }
@@ -53,8 +74,12 @@ public class PayAccessibilityService extends AccessibilityService {
         this.takeLatestOrderBean = takeLatestOrderBean;
     }
 
+    public synchronized void setCollectBillResponse(CollectBillResponse collectBillResponse) {
+        this.collectBillResponse = collectBillResponse;
+    }
+
     private void initRun() {
-        // if (!isRun) return;
+        if (!isRun) return;
         handler.postDelayed(this::handlerAccessibility, 2000);
     }
 
@@ -74,7 +99,6 @@ public class PayAccessibilityService extends AccessibilityService {
     }
 
     private void callAccessibility(List<AccessibilityNodeInfo> nodeInfos, AccessibilityNodeInfo nodeInfo) {
-        Logs.d("数量：" + nodeInfos.size());
         Map<String, AccessibilityNodeInfo> nodeInfoMap = AccessibleUtil.toTextMap(nodeInfos);
         Map<String, AccessibilityNodeInfo> viewIdResourceMap = AccessibleUtil.toViewIdResourceMap(nodeInfos);
         try {
@@ -85,13 +109,12 @@ public class PayAccessibilityService extends AccessibilityService {
             transfer(nodeInfoMap, viewIdResourceMap, nodeInfo);
             backToolbar(nodeInfoMap, viewIdResourceMap, nodeInfo);
         } catch (Throwable e) {
-            logWindow.printA("代码执行异常：" + e.getMessage());
             Logs.d("代码执行异常:" + e.getMessage());
         }
     }
 
     private void backToolbar(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap, AccessibilityNodeInfo nodeInfo) {
-        if (takeLatestOrderBean == null) {
+        if (takeLatestOrderBean == null && collectBillResponse == null) {
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366895")) {
                 AccessibilityNodeInfo toolbar = viewIdResourceMap.get("id.co.bri.brimo:id/2131366895");
                 AccessibilityNodeInfo back = toolbar.getParent().getChild(0);
@@ -100,59 +123,195 @@ public class PayAccessibilityService extends AccessibilityService {
         }
     }
 
+    //转账失败
+    private void error(String error, TakeLatestOrderBean takeLatestOrderBean) {
+        logWindow.printA("错误：" + error);
+        Logs.d("错误:" + error);
+        PullPost(0, error, takeLatestOrderBean);
+        this.takeLatestOrderBean = null;
+    }
+
+    //转账成功
+    private void success(TakeLatestOrderBean takeLatestOrderBean) {
+        logWindow.printA(takeLatestOrderBean.getOrderNo() + "转账成功");
+        Logs.d(takeLatestOrderBean.getOrderNo() + "转账成功");
+        PullPost(1, "Transaction in Progress", takeLatestOrderBean);
+        this.takeLatestOrderBean = null;
+    }
+
+
+    //归集成功
+    private void success(CollectBillResponse collectBillResponse) {
+        postCollectStatus(1, "归集成功", collectBillResponse.getId());
+        setCollectBillResponse(null);
+        balance = "0";
+        logWindow.printA("归集成功");
+        Logs.d("归集成功");
+    }
+
+    //归集失败
+    private void error(String text, CollectBillResponse collectBillResponse) {
+        postCollectStatus(2, text, collectBillResponse.getId());
+        setCollectBillResponse(null);
+        balance = "0";
+        Logs.d("转账失败");
+        logWindow.printA("归集失败");
+    }
+
+
+    private void postCollectStatus(int state, String error, long id) {
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(String.format("%sv1/collectStatus?id=%s&state=%s&error=%s", appConfig.getCollectUrl(), id, state, error))
+                .build();
+        okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                call.clone();
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                response.close();
+                response.close();
+            }
+        });
+    }
+
+
+    public void PullPost(int state, String error, TakeLatestOrderBean transferBean) {
+        if (transferBean == null) return;
+        FormBody.Builder requestBody = new FormBody.Builder();
+        if (error.equals("Transaction in Progress")) {
+            state = 1;
+        }
+        if (state == 1) {
+            requestBody.add("paymentCertificate", "Transaction Successful");
+            Logs.d(transferBean.getOrderNo() + "转账完毕，结果:成功");
+        } else {
+            Logs.d(transferBean.getOrderNo() + "转账完毕，结果:失败 原因:" + error);
+        }
+        requestBody.add("state", String.valueOf(state));
+        String timeStr = new android.icu.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINESE).format(System.currentTimeMillis());
+        requestBody.add("paymentTime", timeStr);
+        requestBody.add("failReason", error);
+        requestBody.add("amount", String.valueOf(transferBean.getAmount()));
+        requestBody.add("orderNo", transferBean.getOrderNo());
+        Request request = new Request.Builder()
+                .post(requestBody.build())
+                .url(appConfig.getPayUrl() + "app/payoutOrderCallback")
+                .build();
+        OkHttpClient client = new OkHttpClient();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                call.clone();
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                response.close();
+                call.clone();
+            }
+        });
+    }
+
+
     //开始转账
     private void transfer(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap, AccessibilityNodeInfo nodeInfo) {
-        if (takeLatestOrderBean == null) return;
+        if (takeLatestOrderBean == null && collectBillResponse == null) return;
 
         //点击选择银行编码
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363024")) {
             AccessibilityNodeInfo bank = viewIdResourceMap.get("id.co.bri.brimo:id/2131363024");
             String text = bank.getText().toString();
-            if (!text.equals(takeLatestOrderBean.getBankName())) {
-                clickButton(bank);
+            if (takeLatestOrderBean != null) {
+                if (!text.equals(takeLatestOrderBean.getBankName())) {
+                    clickButton(bank);
+                }
+            } else if (collectBillResponse != null) {
+                if (!text.equals(collectBillResponse.getBank())) {
+                    clickButton(bank);
+                }
             }
         }
 
         //判断银行编码存在，输入卡号
-        if (nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
-            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363171")) {//确认银行输入
-                AccessibilityNodeInfo edit = viewIdResourceMap.get("id.co.bri.brimo:id/2131363171");
-                AccessibleUtil.inputTextByAccessibility(edit, takeLatestOrderBean.getCardNumber());
+        if (takeLatestOrderBean != null) {
+            if (nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
+                if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363171")) {//确认银行输入
+                    AccessibilityNodeInfo edit = viewIdResourceMap.get("id.co.bri.brimo:id/2131363171");
+                    AccessibleUtil.inputTextByAccessibility(edit, takeLatestOrderBean.getCardNumber());
+                }
+            }
+        } else if (collectBillResponse != null) {
+            if (nodeInfoMap.containsKey(collectBillResponse.getBank())) {
+                if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363171")) {//确认银行输入
+                    AccessibilityNodeInfo edit = viewIdResourceMap.get("id.co.bri.brimo:id/2131363171");
+                    AccessibleUtil.inputTextByAccessibility(edit, collectBillResponse.getPhone());
+                }
             }
         }
 
         //输入银行编码
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366522")) {
             AccessibilityNodeInfo input = viewIdResourceMap.get("id.co.bri.brimo:id/2131366522");
-            AccessibleUtil.inputTextByAccessibility(input, takeLatestOrderBean.getBankName());
-
+            if (takeLatestOrderBean != null) {
+                AccessibleUtil.inputTextByAccessibility(input, takeLatestOrderBean.getBankName());
+            } else if (collectBillResponse != null) {
+                AccessibleUtil.inputTextByAccessibility(input, collectBillResponse.getBank());
+            }
             List<AccessibilityNodeInfo> banks = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131368339");
             List<AccessibilityNodeInfo> bankText = new ArrayList<>();
             for (AccessibilityNodeInfo bank : banks) {
-                List<AccessibilityNodeInfo> bankTextA = bank.findAccessibilityNodeInfosByText(takeLatestOrderBean.getBankName());
-                bankText.addAll(bankTextA);
+                if (takeLatestOrderBean != null) {
+                    List<AccessibilityNodeInfo> bankTextA = bank.findAccessibilityNodeInfosByText(takeLatestOrderBean.getBankName());
+                    bankText.addAll(bankTextA);
+                } else if (collectBillResponse != null) {
+                    List<AccessibilityNodeInfo> bankTextA = bank.findAccessibilityNodeInfosByText(collectBillResponse.getBank());
+                    bankText.addAll(bankTextA);
+                }
             }
             for (AccessibilityNodeInfo bank : bankText) {
                 String text = bank.getText().toString();
-                if (text.equals(takeLatestOrderBean.getBankName())) {
-                    clickButton(bank.getParent().getParent());
+                if (takeLatestOrderBean != null) {
+                    if (text.equals(takeLatestOrderBean.getBankName())) {
+                        clickButton(bank.getParent().getParent());
+                    }
+                } else if (collectBillResponse != null) {
+                    if (text.equals(collectBillResponse.getBank())) {
+                        clickButton(bank.getParent().getParent());
+                    }
                 }
             }
         }
 
-        if (nodeInfoMap.containsKey(takeLatestOrderBean.getCardNumber()) && nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
-            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
-                AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
-                Logs.d("控件信息:" + button.toString());
-                AccessibleUtil.ClickX200(this, button);
+        //输入信息确认转账
+        if (takeLatestOrderBean != null) {
+            if (nodeInfoMap.containsKey(takeLatestOrderBean.getCardNumber()) && nodeInfoMap.containsKey(takeLatestOrderBean.getBankName())) {
+                if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
+                    AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
+                    AccessibleUtil.ClickX200(this, button);
+                }
+            }
+        } else if (collectBillResponse != null) {
+            if (nodeInfoMap.containsKey(collectBillResponse.getCardNumber()) && nodeInfoMap.containsKey(collectBillResponse.getBank())) {
+                if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
+                    AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
+                    AccessibleUtil.ClickX200(this, button);
+                }
             }
         }
 
         //是否账号错误
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366944")) {
             AccessibilityNodeInfo error = viewIdResourceMap.get("id.co.bri.brimo:id/2131366944");
-            logWindow.printA("错误：" + error.getText().toString());
-            takeLatestOrderBean = null;
+            String text = error.getText().toString();
+            if (takeLatestOrderBean != null) {
+                error(text, takeLatestOrderBean);
+            } else if (collectBillResponse != null) {
+                error(text, collectBillResponse);
+            }
             return;
         }
 
@@ -164,7 +323,11 @@ public class PayAccessibilityService extends AccessibilityService {
                 AccessibilityNodeInfo money = viewIdResourceMap.get("id.co.bri.brimo:id/2131363155");
                 String text = money.getText().toString();
                 if (text.equals("0")) {
-                    AccessibleUtil.inputTextByAccessibility(money, String.valueOf(takeLatestOrderBean.getAmount()));
+                    if (takeLatestOrderBean != null) {
+                        AccessibleUtil.inputTextByAccessibility(money, String.valueOf(takeLatestOrderBean.getAmount()));
+                    } else if (collectBillResponse != null) {
+                        AccessibleUtil.inputTextByAccessibility(money, String.valueOf(collectBillResponse.getIdPlgn()));
+                    }
                 } else {
                     if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
                         AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
@@ -176,26 +339,45 @@ public class PayAccessibilityService extends AccessibilityService {
 
             //错误信息
             if (nodeInfoMap.containsKey("Saldo Anda tidak cukup")) {
-                logWindow.printA("错误：Saldo Anda tidak cukup");
-                takeLatestOrderBean = null;
+                if (takeLatestOrderBean != null) {
+                    error("Saldo Anda tidak cukup", takeLatestOrderBean);
+                } else if (collectBillResponse != null) {
+                    error("Saldo Anda tidak cukup", collectBillResponse);
+                }
+                return;
             }
 
         }
 
         //确认账单
         if (nodeInfoMap.containsKey("Konfirmasi")) {
-            Logs.d("进入");
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362129")) {
                 AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362129");
                 clickButton(button);
             }
         }
 
+        //输入支付密码
+        if (nodeInfoMap.containsKey("PIN")) {
+            String pinPass = appConfig.getPASS();
+            for (int i = 0; i < pinPass.length(); i++) {
+                char c = pinPass.charAt(i);
+                String charAsString = String.valueOf(c); // 将 char 转为 String
+                if (!nodeInfoMap.containsKey(charAsString)) continue;
+                AccessibilityNodeInfo nodeInfo1 = nodeInfoMap.get(charAsString);
+                clickButton(nodeInfo1);
+            }
+            if (takeLatestOrderBean != null) {
+                success(takeLatestOrderBean);
+            } else if (collectBillResponse != null) {
+                success(collectBillResponse);
+            }
+        }
     }
 
 
     private void TambahPenerimaBaru(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
-        if (takeLatestOrderBean == null) return;
+        if (takeLatestOrderBean == null && collectBillResponse == null) return;
         if (nodeInfoMap.containsKey("Tambah Penerima Baru")) {
             clickButton(nodeInfoMap, "Tambah Penerima Baru");
         }
@@ -208,17 +390,52 @@ public class PayAccessibilityService extends AccessibilityService {
             if (list != null) {
                 List<AccessibilityNodeInfo> nodeInfos = list.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131364918");
                 BillUtils billEntity = new BillUtils(nodeInfos);
+                handlerData(billEntity);
             }
             handler.postDelayed(() -> {
-                if (takeLatestOrderBean == null) AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 800 * 2, 2000);
+                if (takeLatestOrderBean == null && collectBillResponse == null) {
+                    AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 800 * 2, 2000);
+                }
             }, 2000);
             isBill = false;
 
             //前往首页转账
             if (takeLatestOrderBean != null) {
                 clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362020");
+            } else if (collectBillResponse != null) {
+                clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362020");
+            }
+
+        }
+    }
+
+
+    //处理账单
+    private void handlerData(BillUtils billUtils) {
+        AppDatabase appDatabase = AppDatabase.getInstance(this);
+        BillDao dao = appDatabase.billDao();
+        List<BillEntity> billEntities = new ArrayList<>();
+        for (BillUtils.BillEntity billEntity : billUtils.getBillEntities()) {
+            if (dao.countByText(billEntity.toString()) > 0) continue;
+            if (billEntity.getMoney().contains("+")) {
+                BillEntity bill = new BillEntity();
+                bill.setState(0);
+                bill.setMoney(billEntity.getMoney());
+                bill.setName(billEntity.getName());
+                bill.setText(billEntity.toString());
+                bill.setTime(getSystemFormattedTime());
+                billEntities.add(bill);
             }
         }
+        dao.insert(billEntities);
+    }
+
+    /**
+     * 使用Android系统提供的格式化工具
+     */
+    private String getSystemFormattedTime() {
+        // 根据系统设置自动适配12/24小时制
+        return DateFormat.format("yyyy-MM-dd hh:mm:ss", new Date()).toString();
     }
 
 
@@ -232,7 +449,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
         //判断是否首页
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131367227")) {
-            if (takeLatestOrderBean != null) {//有订单,点击转账
+            if (takeLatestOrderBean != null || collectBillResponse != null) {//有订单,点击转账
                 if (nodeInfoMap.containsKey("Transfer")) {
                     List<AccessibilityNodeInfo> item = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131365888");
                     item.forEach(accessibilityNodeInfo -> {
@@ -266,7 +483,6 @@ public class PayAccessibilityService extends AccessibilityService {
 
     //登录
     private void login(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
-        String pass = "Zh112212";
         //点击登录按钮
         if (nodeInfoMap.containsKey("Kontak \n" +
                 "Kami")) {
@@ -274,7 +490,7 @@ public class PayAccessibilityService extends AccessibilityService {
         } else if (nodeInfoMap.containsKey("Lupa Username/Password? ")) {//弹窗登录
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363182")) {
                 AccessibilityNodeInfo accessibilityNodeInfo = viewIdResourceMap.get("id.co.bri.brimo:id/2131363182");
-                AccessibleUtil.inputTextByAccessibility(accessibilityNodeInfo, pass);
+                AccessibleUtil.inputTextByAccessibility(accessibilityNodeInfo, appConfig.getLockPass());
             }
         }
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362361")) {//点击登录
@@ -302,24 +518,34 @@ public class PayAccessibilityService extends AccessibilityService {
         appConfig = new AppConfig(this);
         if (appConfig.isConfigValid()) {
             logWindow.printA("配置设置不全");
-            // isRun = false;
+            isRun = false;
         }
         payRunnable = new PayRunnable(this);
+        billRunnable = new BillRunnable(this);
+        collectionAccessibilityRunnable = new CollectionAccessibilityRunnable(this);
+        new Thread(billRunnable).start();
         new Thread(payRunnable).start();
+        new Thread(collectionAccessibilityRunnable).start();
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+        handlerError();
+    }
+
+    private void handlerError() {
         AccessibilityNodeInfo accessibilityNodeInfo = getRootInActiveWindow();
         if (accessibilityNodeInfo == null) return;
-        if (takeLatestOrderBean == null) return;
         List<AccessibilityNodeInfo> errors = accessibilityNodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131366594");
-        if (!errors.isEmpty()) {
-            for (AccessibilityNodeInfo error : errors) {
-                logWindow.printA("错误：" + error.getText().toString());
-                takeLatestOrderBean = null;
-                break;
+        if (errors.isEmpty()) return;
+        for (AccessibilityNodeInfo error : errors) {
+            String text = error.getText().toString();
+            if (takeLatestOrderBean != null) {
+                error(text, takeLatestOrderBean);
+            } else if (collectBillResponse != null) {
+                error(text, collectBillResponse);
             }
+            break;
         }
     }
 

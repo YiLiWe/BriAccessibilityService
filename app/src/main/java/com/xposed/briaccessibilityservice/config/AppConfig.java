@@ -111,9 +111,8 @@ public class AppConfig {
     }
 
     private void setText(String text, TextInputEditText textInputEditText) {
-        if (text.isBlank()) {
-            textInputEditText.setText(text);
-        }
+        if (text.isEmpty()) return;
+        textInputEditText.setText(text);
     }
 
     // ========== 批量设置方法 ==========

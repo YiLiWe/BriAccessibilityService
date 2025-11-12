@@ -15,7 +15,7 @@ public class BillUtils {
 
     @Data
     @ToString
-    private static class BillEntity {
+    public static class BillEntity {
         private String name; //Transfer Ke RAGA AJAIBAN via BRImo
         private String money;//- Rp15.000,00 + Rp500.000,00
         private String time;//18:28:16 WIB
