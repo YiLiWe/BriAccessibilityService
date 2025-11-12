@@ -80,7 +80,7 @@
                 android:id="@+id/pass"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Zh0909!@#" />
+                android:text="Zh112212" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button

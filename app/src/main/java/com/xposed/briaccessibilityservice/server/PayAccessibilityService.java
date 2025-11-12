@@ -359,7 +359,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
         //输入支付密码
         if (nodeInfoMap.containsKey("PIN")) {
-            String pinPass = appConfig.getPASS();
+            String pinPass = appConfig.getLockPass();
             for (int i = 0; i < pinPass.length(); i++) {
                 char c = pinPass.charAt(i);
                 String charAsString = String.valueOf(c); // 将 char 转为 String
@@ -490,7 +490,7 @@ public class PayAccessibilityService extends AccessibilityService {
         } else if (nodeInfoMap.containsKey("Lupa Username/Password? ")) {//弹窗登录
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363182")) {
                 AccessibilityNodeInfo accessibilityNodeInfo = viewIdResourceMap.get("id.co.bri.brimo:id/2131363182");
-                AccessibleUtil.inputTextByAccessibility(accessibilityNodeInfo, appConfig.getLockPass());
+                AccessibleUtil.inputTextByAccessibility(accessibilityNodeInfo, appConfig.getPASS());
             }
         }
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362361")) {//点击登录
