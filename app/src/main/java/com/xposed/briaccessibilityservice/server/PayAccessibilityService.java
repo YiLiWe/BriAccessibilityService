@@ -444,16 +444,16 @@ public class PayAccessibilityService extends AccessibilityService {
     private void mutasi(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366272")) {//账单父类
             AccessibilityNodeInfo list = viewIdResourceMap.get("id.co.bri.brimo:id/2131366272");
+            handler.postDelayed(() -> {
+                if (takeLatestOrderBean == null && collectBillResponse == null) {
+                    AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 900 * 2, 1000);
+                }
+            }, 5000);
             if (list != null) {
                 List<AccessibilityNodeInfo> nodeInfos = list.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131364918");
                 BillUtils billEntity = new BillUtils(nodeInfos);
                 handlerData(billEntity);
             }
-            handler.postDelayed(() -> {
-                if (takeLatestOrderBean == null && collectBillResponse == null) {
-                    AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 800 * 2, 2000);
-                }
-            }, 2000);
             isBill = false;
 
             //前往首页转账
