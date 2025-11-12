@@ -72,7 +72,8 @@ public class AppConfig {
     public boolean isEditable(Editable... editables) {
         for (Editable editable : editables) {
             if (editable == null) return false;
-            if (editable.isEmpty()) return false;
+            String text = editable.toString();
+            if (text.isEmpty()) return false;
         }
         return true;
     }
