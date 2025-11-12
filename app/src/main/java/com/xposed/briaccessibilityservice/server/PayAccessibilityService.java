@@ -272,22 +272,11 @@ public class PayAccessibilityService extends AccessibilityService {
                 if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363155")) {
                     AccessibilityNodeInfo edit = viewIdResourceMap.get("id.co.bri.brimo:id/2131363155");
                     AccessibleUtil.inputTextByAccessibility(edit, String.valueOf(takeLatestOrderBean.getAmount()));
-
+                    clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362282");
+                    Logs.d("点击确认输入金额");
                 }
             }
 
-            //判断是否输入金额
-            if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363155")) {
-                AccessibilityNodeInfo edit = viewIdResourceMap.get("id.co.bri.brimo:id/2131363155");
-                String text = edit.getText().toString();
-                if (!text.equals("0")) {
-                    if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362282")) {
-                        AccessibilityNodeInfo nodeInfo1 = viewIdResourceMap.get("id.co.bri.brimo:id/2131362282");
-                        AccessibleUtil.Click(this, nodeInfo1);
-                        Logs.d("点击确认输入金额");
-                    }
-                }
-            }
 
             //确认转账
             if (nodeInfoMap.containsKey("Konfirmasi")) {
