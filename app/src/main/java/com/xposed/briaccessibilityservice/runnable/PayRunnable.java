@@ -85,7 +85,8 @@ public class PayRunnable implements Runnable {
     }
 
     public TakeLatestOrderBean getOrder() {
-        String text = takeLatestPayoutOrder();
+       // String text = takeLatestPayoutOrder();
+        String text="{\"code\":200,\"message\":\"操作成功\",\"data\":{\"orderNo\":\"1988615895911497728\",\"amount\":\"20000\",\"cardNumber\":\"085607316859\",\"bankName\":\"DANA\",\"payeeName\":\"aaa\",\"loginPwd\":\"123456\",\"payPwd\":\"01001\"},\"timestamp\":1762957956789,\"error\":false,\"success\":true}";
         if (text == null) return null;
         Logs.d("代付订单:" + text);
         if (!text.startsWith("{")) return null;
