@@ -14,7 +14,6 @@ public class BillUtils {
     private final List<BillEntity> billEntities = new ArrayList<>();
 
     @Data
-    @ToString
     public static class BillEntity {
         private String name; //Transfer Ke RAGA AJAIBAN via BRImo
         private String money;//- Rp15.000,00 + Rp500.000,00
@@ -31,6 +30,10 @@ public class BillUtils {
                 return accessibilityNodeInfo.getText().toString();
             }
             return null;
+        }
+
+        public String toString() {
+            return name + money + time;
         }
     }
 
