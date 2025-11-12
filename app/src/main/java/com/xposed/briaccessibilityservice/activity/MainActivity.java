@@ -10,9 +10,11 @@ import androidx.annotation.Nullable;
 
 import com.hjq.permissions.XXPermissions;
 import com.hjq.permissions.permission.PermissionLists;
+import com.xposed.briaccessibilityservice.R;
 import com.xposed.briaccessibilityservice.activity.base.BaseActivity;
 import com.xposed.briaccessibilityservice.config.AppConfig;
 import com.xposed.briaccessibilityservice.databinding.ActivityMainBinding;
+import com.xposed.briaccessibilityservice.utils.DeviceUtils;
 
 public class MainActivity extends BaseActivity<ActivityMainBinding> {
     private AppConfig appConfig;
@@ -20,6 +22,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        binding.toolbar.setTitle(getString(R.string.app_name) + " V" + DeviceUtils.getVerName(this));
+
         appConfig = new AppConfig(this);
         appConfig.getAllConfig(binding.cardNumber, binding.collectUrl, binding.payUrl, binding.lockPass, binding.pass);
         initViewClick();
