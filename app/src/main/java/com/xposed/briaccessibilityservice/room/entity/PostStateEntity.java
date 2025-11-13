@@ -6,12 +6,7 @@ import androidx.room.PrimaryKey;
 
 import java.util.Date;
 
-import lombok.Getter;
-import lombok.Setter;
-
 //提交失败账单
-@Getter
-@Setter
 @Entity(tableName = "post_state")
 public class PostStateEntity {
     // 主键
@@ -52,5 +47,61 @@ public class PostStateEntity {
         postStateEntity.setCreateDate(new Date());
         postStateEntity.setType(type);
         return postStateEntity;
+    }
+
+    public long getUid() {
+        return uid;
+    }
+
+    public void setUid(long uid) {
+        this.uid = uid;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
+    }
+
+    public String getOrderNo() {
+        return orderNo;
+    }
+
+    public void setOrderNo(String orderNo) {
+        this.orderNo = orderNo;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public int getPostState() {
+        return postState;
+    }
+
+    public void setPostState(int postState) {
+        this.postState = postState;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 }
