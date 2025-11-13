@@ -104,9 +104,11 @@ public class PayRunnable implements Runnable {
 
     //获取代付订单
     public String takeLatestPayoutOrder() {
+        Long money = Long.parseLong(service.getBalance());
+        Long moneyA = money / 100;
         RequestBody requestBody = new FormBody.Builder()
                 .add("cardNumber", appConfig.getCardNumber())
-                .add("balance", service.getBalance())
+                .add("balance", String.valueOf(moneyA))
                 .build();
         Request request = new Request.Builder()
                 .post(requestBody)
