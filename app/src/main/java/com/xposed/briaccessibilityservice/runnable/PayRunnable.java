@@ -1,25 +1,17 @@
 package com.xposed.briaccessibilityservice.runnable;
 
-import androidx.annotation.NonNull;
-
 import com.alibaba.fastjson2.JSON;
 import com.xposed.briaccessibilityservice.config.AppConfig;
 import com.xposed.briaccessibilityservice.runnable.response.MessageBean;
 import com.xposed.briaccessibilityservice.runnable.response.TakeLatestOrderBean;
 import com.xposed.briaccessibilityservice.server.PayAccessibilityService;
-import com.xposed.briaccessibilityservice.utils.BankUtils;
 import com.xposed.briaccessibilityservice.utils.Logs;
-import com.xposed.briaccessibilityservice.utils.TimeUtils;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import lombok.Getter;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
