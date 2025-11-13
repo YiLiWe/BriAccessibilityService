@@ -109,6 +109,9 @@ public class PayAccessibilityService extends AccessibilityService {
     private void callAccessibility(List<AccessibilityNodeInfo> nodeInfos, AccessibilityNodeInfo nodeInfo) {
         Map<String, AccessibilityNodeInfo> nodeInfoMap = AccessibleUtil.toTextMap(nodeInfos);
         Map<String, AccessibilityNodeInfo> viewIdResourceMap = AccessibleUtil.toViewIdResourceMap(nodeInfos);
+
+        getMoney(nodeInfoMap, viewIdResourceMap);
+
         try {
             login(nodeInfoMap, viewIdResourceMap);
             home(nodeInfoMap, viewIdResourceMap, nodeInfo);
@@ -126,8 +129,11 @@ public class PayAccessibilityService extends AccessibilityService {
         if (takeLatestOrderBean == null && collectBillResponse == null) {
             if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131366895")) {
                 AccessibilityNodeInfo toolbar = viewIdResourceMap.get("id.co.bri.brimo:id/2131366895");
-                AccessibilityNodeInfo back = toolbar.getParent().getChild(0);
-                clickButton(back);
+                AccessibilityNodeInfo item = toolbar.getParent();
+                if (item != null && item.getChildCount() > 0) {
+                    AccessibilityNodeInfo back = item.getChild(0);
+                    clickButton(back);
+                }
             }
         }
     }
@@ -473,7 +479,6 @@ public class PayAccessibilityService extends AccessibilityService {
 
     //首页
     private void home(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap, AccessibilityNodeInfo nodeInfo) {
-        getMoney(nodeInfoMap, viewIdResourceMap);
 
         if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131363886")) {
             clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131363886");
@@ -528,7 +533,8 @@ public class PayAccessibilityService extends AccessibilityService {
                     Logs.d("余额：" + this.balance);
                 }
             }
-            isBill = true;
+            AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 900 * 2, 1000);
+            handler.postDelayed(() -> isBill = true,5000);
         }
     }
 
