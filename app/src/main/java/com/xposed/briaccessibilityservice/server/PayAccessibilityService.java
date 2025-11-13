@@ -554,7 +554,6 @@ public class PayAccessibilityService extends AccessibilityService {
                 if (!numbersOnly.isEmpty()) {
                     this.balance = numbersOnly;
                     Logs.d("余额：" + this.balance);
-                    AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 900 * 2, 1000);
                 }
             }
             isBill = true;
