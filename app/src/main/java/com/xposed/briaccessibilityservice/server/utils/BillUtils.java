@@ -32,7 +32,12 @@ public class BillUtils {
             return null;
         }
 
+        public boolean isNull() {
+            return name == null || money == null || time == null;
+        }
+
         public String toString() {
+
             return name + money + time;
         }
     }
