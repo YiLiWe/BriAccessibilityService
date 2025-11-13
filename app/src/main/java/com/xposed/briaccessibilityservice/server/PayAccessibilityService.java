@@ -86,7 +86,7 @@ public class PayAccessibilityService extends AccessibilityService {
                 clickButton(nodeInfo1);
             }
         }
-        handler.postDelayed(this::homeRun, 15_000);
+        handler.postDelayed(this::homeRun, 10_000);
     }
 
     private void refresh() {
