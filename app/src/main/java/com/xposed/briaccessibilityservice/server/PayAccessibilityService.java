@@ -93,7 +93,8 @@ public class PayAccessibilityService extends AccessibilityService {
         AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
         if (nodeInfo != null) {
             List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131366272");
-            if (!nodeInfos.isEmpty()) {//账单父类
+            List<AccessibilityNodeInfo> nodeInfos1 = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131367227");
+            if (!nodeInfos.isEmpty() || !nodeInfos1.isEmpty()) {//账单父类
                 if (takeLatestOrderBean == null && collectBillResponse == null) {
                     AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 900 * 2, 1000);
                     Logs.d("触发下拉");
