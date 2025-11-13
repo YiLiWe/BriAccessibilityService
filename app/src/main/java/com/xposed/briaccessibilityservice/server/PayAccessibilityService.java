@@ -535,7 +535,7 @@ public class PayAccessibilityService extends AccessibilityService {
                     AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 900 * 2, 1000);
                 }
             }
-            handler.postDelayed(() -> isBill = true, 3000);
+            isBill = true;
         }
     }
 
