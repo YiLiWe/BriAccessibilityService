@@ -14,6 +14,9 @@ import com.xposed.briaccessibilityservice.R;
 import com.xposed.briaccessibilityservice.activity.base.BaseActivity;
 import com.xposed.briaccessibilityservice.config.AppConfig;
 import com.xposed.briaccessibilityservice.databinding.ActivityMainBinding;
+import com.xposed.briaccessibilityservice.room.AppDatabase;
+import com.xposed.briaccessibilityservice.room.dao.BillDao;
+import com.xposed.briaccessibilityservice.room.dao.PostStateDao;
 import com.xposed.briaccessibilityservice.utils.DeviceUtils;
 
 public class MainActivity extends BaseActivity<ActivityMainBinding> {
@@ -28,6 +31,22 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
         appConfig.getAllConfig(binding.cardNumber, binding.collectUrl, binding.payUrl, binding.lockPass, binding.pass);
         initViewClick();
         requestOverlayPermission();
+
+        initData();
+    }
+
+    private void initData() {
+        AppDatabase appDatabase = AppDatabase.getInstance(this);
+        PostStateDao postStateDao = appDatabase.postStateDao();
+        BillDao billDao = appDatabase.billDao();
+
+        binding.text.append("\\代付待提交状态数:" + postStateDao.countPostStateAndType(0,0));
+        binding.text.append("\n代付总提交成功数:" + postStateDao.countPostStateAndType(1,0));
+        binding.text.append("\\归集待提交状态数:" + postStateDao.countPostStateAndType(0,1));
+        binding.text.append("\n归集总提交成功数:" + postStateDao.countPostStateAndType(1,1));
+
+        binding.text.append("\n待提交账单数:" + billDao.countPostState(0));
+        binding.text.append("\n总提交账单数:" + billDao.countPostState(1));
     }
 
     private void initViewClick() {
@@ -55,6 +74,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
     /**
      * 检查悬浮窗权限
      */
+
     public boolean hasOverlayPermission() {
         return XXPermissions.isGrantedPermission(this, PermissionLists.getSystemAlertWindowPermission());
     }

@@ -11,6 +11,9 @@ lombok = "1.18.36"
 refreshLayoutKernel = "2.1.0"
 refreshHeaderClassics = "2.1.0"
 refreshFooterClassics = "2.1.0"
+roomRuntime = "2.6.1"
+roomCompiler = "2.6.1"
+xxpermissions = "26.5"
 
 [libraries]
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -25,6 +28,9 @@ lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 refresh-footer-classics = { module = "io.github.scwang90:refresh-footer-classics", version.ref = "refreshFooterClassics" }
 refresh-header-classics = { module = "io.github.scwang90:refresh-header-classics", version.ref = "refreshHeaderClassics" }
 refresh-layout-kernel = { module = "io.github.scwang90:refresh-layout-kernel", version.ref = "refreshLayoutKernel" }
+xxpermissions = { module = "com.github.getActivity:XXPermissions", version.ref = "xxpermissions" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }

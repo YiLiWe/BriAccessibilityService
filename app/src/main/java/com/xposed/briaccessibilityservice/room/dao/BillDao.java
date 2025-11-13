@@ -14,6 +14,9 @@ public interface BillDao {
     @Insert
     long insert(BillEntity bill);
 
+    @Query("SELECT count(*) FROM bill p WHERE p.state=:state")
+    long countPostState(int state);
+
     @Insert
     void insert(List<BillEntity> bill);
 

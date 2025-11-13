@@ -7,15 +7,15 @@ import android.text.format.DateFormat;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import androidx.annotation.NonNull;
-
 import com.xposed.briaccessibilityservice.config.AppConfig;
 import com.xposed.briaccessibilityservice.room.AppDatabase;
 import com.xposed.briaccessibilityservice.room.dao.BillDao;
 import com.xposed.briaccessibilityservice.room.entity.BillEntity;
+import com.xposed.briaccessibilityservice.room.entity.PostStateEntity;
 import com.xposed.briaccessibilityservice.runnable.BillRunnable;
 import com.xposed.briaccessibilityservice.runnable.CollectionAccessibilityRunnable;
 import com.xposed.briaccessibilityservice.runnable.PayRunnable;
+import com.xposed.briaccessibilityservice.runnable.PostStateRunnable;
 import com.xposed.briaccessibilityservice.runnable.response.CollectBillResponse;
 import com.xposed.briaccessibilityservice.runnable.response.TakeLatestOrderBean;
 import com.xposed.briaccessibilityservice.server.utils.BillUtils;
@@ -23,21 +23,13 @@ import com.xposed.briaccessibilityservice.utils.AccessibleUtil;
 import com.xposed.briaccessibilityservice.utils.DeviceUtils;
 import com.xposed.briaccessibilityservice.utils.Logs;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 @Setter
 @Getter
@@ -51,6 +43,7 @@ public class PayAccessibilityService extends AccessibilityService {
     private CollectBillResponse collectBillResponse;
     private PayRunnable payRunnable;
     private BillRunnable billRunnable;
+    private PostStateRunnable postStateRunnable;
     private CollectionAccessibilityRunnable collectionAccessibilityRunnable;
 
     //=========局部变量=========
@@ -141,99 +134,61 @@ public class PayAccessibilityService extends AccessibilityService {
 
     //转账失败
     private void error(String error, TakeLatestOrderBean takeLatestOrderBean) {
-        if (error.equals("5 Cara Jadi Sultan Tanpa Warisan")) return;
-        logWindow.printA("错误：" + error);
-        Logs.d("错误:" + error);
-        PullPost(0, error, takeLatestOrderBean);
+        logWindow.printA(takeLatestOrderBean.getOrderNo() + "错误：" + error);
+        Logs.d(takeLatestOrderBean.getOrderNo() + "错误:" + error);
+
+        AppDatabase appDatabase = AppDatabase.getInstance(this);
+        PostStateEntity postStateEntity = PostStateEntity.create(takeLatestOrderBean.getOrderNo(), 0, 0, error);
+        PullPost pullPost = new PullPost(appDatabase.postStateDao(), postStateEntity, appConfig);
+        pullPost.start();
+
         this.takeLatestOrderBean = null;
+        balance = "0";
     }
 
     //转账成功
     private void success(TakeLatestOrderBean takeLatestOrderBean) {
         logWindow.printA(takeLatestOrderBean.getOrderNo() + "转账成功");
         Logs.d(takeLatestOrderBean.getOrderNo() + "转账成功");
-        PullPost(1, "Transaction in Progress", takeLatestOrderBean);
+
+        AppDatabase appDatabase = AppDatabase.getInstance(this);
+        PostStateEntity postStateEntity = PostStateEntity.create(takeLatestOrderBean.getOrderNo(), 0, 1, "Transaction in Progress");
+        PullPost pullPost = new PullPost(appDatabase.postStateDao(), postStateEntity, appConfig);
+        pullPost.start();
+
         this.takeLatestOrderBean = null;
+        balance = "0";
     }
 
 
     //归集成功
     private void success(CollectBillResponse collectBillResponse) {
-        postCollectStatus(1, "归集成功", collectBillResponse.getId());
-        setCollectBillResponse(null);
+        logWindow.printA(collectBillResponse.getId() + "归集成功");
+        Logs.d(collectBillResponse.getId() + "归集成功");
+
+        AppDatabase appDatabase = AppDatabase.getInstance(this);
+        PostStateEntity postStateEntity = PostStateEntity.create(String.valueOf(collectBillResponse.getId()), 1, 1, "Transaction in Progress");
+        PullPost pullPost = new PullPost(appDatabase.postStateDao(), postStateEntity, appConfig);
+        pullPost.start();
+
+        this.collectBillResponse = null;
         balance = "0";
-        logWindow.printA("归集成功");
-        Logs.d("归集成功");
+
     }
 
     //归集失败
     private void error(String text, CollectBillResponse collectBillResponse) {
-        if (text.equals("5 Cara Jadi Sultan Tanpa Warisan")) return;
-        postCollectStatus(2, text, collectBillResponse.getId());
-        setCollectBillResponse(null);
+        logWindow.printA(collectBillResponse.getId() + "归集失败");
+        Logs.d(collectBillResponse.getId() + "归集失败");
+
+        AppDatabase appDatabase = AppDatabase.getInstance(this);
+        PostStateEntity postStateEntity = PostStateEntity.create(String.valueOf(collectBillResponse.getId()), 1, 2, text);
+        PullPost pullPost = new PullPost(appDatabase.postStateDao(), postStateEntity, appConfig);
+        pullPost.start();
+
+        this.collectBillResponse = null;
         balance = "0";
-        Logs.d("转账失败");
-        logWindow.printA("归集失败");
     }
-
-
-    private void postCollectStatus(int state, String error, long id) {
-        OkHttpClient okHttpClient = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(String.format("%sv1/collectStatus?id=%s&state=%s&error=%s", appConfig.getCollectUrl(), id, state, error))
-                .build();
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                call.clone();
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                response.close();
-                response.close();
-            }
-        });
-    }
-
-
-    public void PullPost(int state, String error, TakeLatestOrderBean transferBean) {
-        if (transferBean == null) return;
-        FormBody.Builder requestBody = new FormBody.Builder();
-        if (error.equals("Transaction in Progress")) {
-            state = 1;
-        }
-        if (state == 1) {
-            requestBody.add("paymentCertificate", "Transaction Successful");
-            Logs.d(transferBean.getOrderNo() + "转账完毕，结果:成功");
-        } else {
-            Logs.d(transferBean.getOrderNo() + "转账完毕，结果:失败 原因:" + error);
-        }
-        requestBody.add("state", String.valueOf(state));
-        String timeStr = new android.icu.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINESE).format(System.currentTimeMillis());
-        requestBody.add("paymentTime", timeStr);
-        requestBody.add("failReason", error);
-        requestBody.add("amount", String.valueOf(transferBean.getAmount()));
-        requestBody.add("orderNo", transferBean.getOrderNo());
-        Request request = new Request.Builder()
-                .post(requestBody.build())
-                .url(appConfig.getPayUrl() + "app/payoutOrderCallback")
-                .build();
-        OkHttpClient client = new OkHttpClient();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                call.clone();
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                response.close();
-                call.clone();
-            }
-        });
-    }
-
 
     //开始转账
     private void transfer(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap, AccessibilityNodeInfo nodeInfo) {
@@ -435,7 +390,7 @@ public class PayAccessibilityService extends AccessibilityService {
         }
 
         //转账成功
-        if (nodeInfoMap.containsKey("Transaksi Berhasil")&&viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362212")){
+        if (nodeInfoMap.containsKey("Transaksi Berhasil") && viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362212")) {
             if (takeLatestOrderBean != null) {
                 success(takeLatestOrderBean);
             } else if (collectBillResponse != null) {
@@ -445,7 +400,6 @@ public class PayAccessibilityService extends AccessibilityService {
         }
 
     }
-
 
     private void TambahPenerimaBaru(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
         if (takeLatestOrderBean == null && collectBillResponse == null) return;
@@ -604,11 +558,14 @@ public class PayAccessibilityService extends AccessibilityService {
             logWindow.printA("配置设置不全");
             isRun = false;
         }
+
         payRunnable = new PayRunnable(this);
         billRunnable = new BillRunnable(this);
+        postStateRunnable = new PostStateRunnable(this);
         collectionAccessibilityRunnable = new CollectionAccessibilityRunnable(this);
         new Thread(billRunnable).start();
         new Thread(payRunnable).start();
+        new Thread(postStateRunnable).start();
         new Thread(collectionAccessibilityRunnable).start();
     }
 
