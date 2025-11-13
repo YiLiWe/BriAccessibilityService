@@ -110,7 +110,6 @@ public class PayAccessibilityService extends AccessibilityService {
         Map<String, AccessibilityNodeInfo> nodeInfoMap = AccessibleUtil.toTextMap(nodeInfos);
         Map<String, AccessibilityNodeInfo> viewIdResourceMap = AccessibleUtil.toViewIdResourceMap(nodeInfos);
 
-        getMoney(nodeInfoMap, viewIdResourceMap);
 
         try {
             login(nodeInfoMap, viewIdResourceMap);
@@ -119,6 +118,8 @@ public class PayAccessibilityService extends AccessibilityService {
             TambahPenerimaBaru(nodeInfoMap, viewIdResourceMap);
             transfer(nodeInfoMap, viewIdResourceMap, nodeInfo);
             backToolbar(nodeInfoMap, viewIdResourceMap, nodeInfo);
+
+            getMoney(nodeInfoMap, viewIdResourceMap);
         } catch (Throwable e) {
             Logs.d("代码执行异常:" + e.getMessage());
             e.printStackTrace();
@@ -531,10 +532,10 @@ public class PayAccessibilityService extends AccessibilityService {
                 if (!numbersOnly.isEmpty()) {
                     this.balance = numbersOnly;
                     Logs.d("余额：" + this.balance);
+                    AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 900 * 2, 1000);
                 }
             }
-            AccessibleUtil.performPullDown(PayAccessibilityService.this, 500 * 2, 900 * 2, 1000);
-            handler.postDelayed(() -> isBill = true,5000);
+            handler.postDelayed(() -> isBill = true, 3000);
         }
     }
 
