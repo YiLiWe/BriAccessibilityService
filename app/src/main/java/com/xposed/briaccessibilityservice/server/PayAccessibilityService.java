@@ -241,6 +241,16 @@ public class PayAccessibilityService extends AccessibilityService {
             if (nodeInfoMap.containsKey("Konfirmasi")) {
                 clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362129");
             }
+
+            //钱包转账失败
+            if (nodeInfoMap.containsKey("Virtual Account Belum Dibuat")) {
+                if (takeLatestOrderBean != null) {
+                    error("Account error", takeLatestOrderBean);
+                } else if (collectBillResponse != null) {
+                    error("Account error", collectBillResponse);
+                }
+                clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362212");
+            }
         }
 
         //点击选择银行编码
