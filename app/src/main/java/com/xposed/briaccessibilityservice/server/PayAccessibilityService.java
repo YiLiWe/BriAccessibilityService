@@ -418,6 +418,16 @@ public class PayAccessibilityService extends AccessibilityService {
             clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362212");
         }
 
+        //网络异常
+        if (nodeInfoMap.containsKey("Koneksi Internet Buruk")){
+            if (takeLatestOrderBean != null) {
+                error("Saldo Anda tidak cukup", takeLatestOrderBean);
+            } else if (collectBillResponse != null) {
+                error("Saldo Anda tidak cukup", collectBillResponse);
+            }
+            clickButton(viewIdResourceMap,"id.co.bri.brimo:id/2131362272");
+        }
+
     }
 
     private void TambahPenerimaBaru(Map<String, AccessibilityNodeInfo> nodeInfoMap, Map<String, AccessibilityNodeInfo> viewIdResourceMap) {
