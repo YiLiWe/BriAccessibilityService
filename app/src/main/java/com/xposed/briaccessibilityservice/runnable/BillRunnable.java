@@ -45,7 +45,9 @@ public class BillRunnable implements Runnable {
 
     private void postBill(BillDao billDao, BillEntity billEntity) {
         OkHttpClient okHttpClient = new OkHttpClient();
-        String text = String.format("%sv1/briBill?cardNumber=%s&text=%s&money=" + billEntity.getMoney() + "&time=" + billEntity.getTime(),
+        long money = Long.parseLong(billEntity.getMoney());
+        long moneyA = money / 100;
+        String text = String.format("%sv1/briBill?cardNumber=%s&text=%s&money=" + moneyA + "&time=" + billEntity.getTime(),
                 appConfig.getCollectUrl(), appConfig.getCardNumber(), billEntity.getText());
         Logs.d("提交内容:" + text);
         Request request = new Request.Builder()
