@@ -537,8 +537,8 @@ public class PayAccessibilityService extends AccessibilityService {
             AccessibilityNodeInfo login = viewIdResourceMap.get("id.co.bri.brimo:id/2131362361");
             if (login.isEnabled()) {
                 clickButton(login);
+                logWindow.printA("重新登录");
             }
-            logWindow.printA("重新登录");
         }
     }
 
