@@ -36,7 +36,7 @@ public class PostStateEntity {
 
     //创建时间
     @ColumnInfo(name = "create_date")
-    public Date createDate;
+    public Long createDate;
 
     public static PostStateEntity create(String orderNo, int type, int state, String error) {
         PostStateEntity postStateEntity = new PostStateEntity();
@@ -44,7 +44,7 @@ public class PostStateEntity {
         postStateEntity.setOrderNo(orderNo);
         postStateEntity.setPostState(0);
         postStateEntity.setError(error);
-        postStateEntity.setCreateDate(new Date());
+        postStateEntity.setCreateDate(System.currentTimeMillis());
         postStateEntity.setType(type);
         return postStateEntity;
     }
@@ -97,11 +97,11 @@ public class PostStateEntity {
         this.postState = postState;
     }
 
-    public Date getCreateDate() {
+    public Long getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(Date createDate) {
+    public void setCreateDate(Long createDate) {
         this.createDate = createDate;
     }
 }
