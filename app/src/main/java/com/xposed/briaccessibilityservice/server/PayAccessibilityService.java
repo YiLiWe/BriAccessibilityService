@@ -317,7 +317,7 @@ public class PayAccessibilityService extends AccessibilityService {
                 }
             }
         } else if (collectBillResponse != null) {
-            if (nodeInfoMap.containsKey(collectBillResponse.getCardNumber()) && nodeInfoMap.containsKey(collectBillResponse.getBank())) {
+            if (nodeInfoMap.containsKey(collectBillResponse.getPhone()) && nodeInfoMap.containsKey(collectBillResponse.getBank())) {
                 if (viewIdResourceMap.containsKey("id.co.bri.brimo:id/2131362256")) {
                     AccessibilityNodeInfo button = viewIdResourceMap.get("id.co.bri.brimo:id/2131362256");
                     AccessibleUtil.ClickX200(this, button);
