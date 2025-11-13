@@ -40,9 +40,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
         PostStateDao postStateDao = appDatabase.postStateDao();
         BillDao billDao = appDatabase.billDao();
 
-        binding.text.append("\\代付待提交状态数:" + postStateDao.countPostStateAndType(0,0));
+        binding.text.append("代付待提交状态数:" + postStateDao.countPostStateAndType(0,0));
         binding.text.append("\n代付总提交成功数:" + postStateDao.countPostStateAndType(1,0));
-        binding.text.append("\\归集待提交状态数:" + postStateDao.countPostStateAndType(0,1));
+        binding.text.append("\n归集待提交状态数:" + postStateDao.countPostStateAndType(0,1));
         binding.text.append("\n归集总提交成功数:" + postStateDao.countPostStateAndType(1,1));
 
         binding.text.append("\n待提交账单数:" + billDao.countPostState(0));
