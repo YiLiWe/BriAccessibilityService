@@ -134,6 +134,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
     //转账失败
     private void error(String error, TakeLatestOrderBean takeLatestOrderBean) {
+        if (error.startsWith("Sesi telah habis")) return;
         logWindow.printA(takeLatestOrderBean.getOrderNo() + "错误：" + error);
         Logs.d(takeLatestOrderBean.getOrderNo() + "错误:" + error);
 
@@ -178,6 +179,7 @@ public class PayAccessibilityService extends AccessibilityService {
 
     //归集失败
     private void error(String text, CollectBillResponse collectBillResponse) {
+        if (text.startsWith("Sesi telah habis")) return;
         logWindow.printA(collectBillResponse.getId() + "归集失败");
         Logs.d(collectBillResponse.getId() + "归集失败");
 
@@ -536,6 +538,7 @@ public class PayAccessibilityService extends AccessibilityService {
             if (login.isEnabled()) {
                 clickButton(login);
             }
+            logWindow.printA("重新登录");
         }
     }
 
