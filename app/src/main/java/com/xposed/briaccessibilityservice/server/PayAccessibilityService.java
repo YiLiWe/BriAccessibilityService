@@ -61,6 +61,7 @@ public class PayAccessibilityService extends AccessibilityService {
         initNew();
         initRun();
         handler.postDelayed(this::refresh, 10_000);
+        handler.postDelayed(this::homeRun, 15_000);
         logWindow.printA("收款(付款)服务V" + DeviceUtils.getVerName(this));
     }
 
@@ -75,6 +76,17 @@ public class PayAccessibilityService extends AccessibilityService {
     private void initRun() {
         if (!isRun) return;
         handler.postDelayed(this::handlerAccessibility, 2000);
+    }
+
+    private void homeRun() {
+        AccessibilityNodeInfo nodeInfo = getRootInActiveWindow();
+        if (nodeInfo != null && takeLatestOrderBean == null && collectBillResponse == null) {
+            List<AccessibilityNodeInfo> nodeInfos = nodeInfo.findAccessibilityNodeInfosByViewId("id.co.bri.brimo:id/2131362020");
+            for (AccessibilityNodeInfo nodeInfo1 : nodeInfos) {
+                clickButton(nodeInfo1);
+            }
+        }
+        handler.postDelayed(this::homeRun, 15_000);
     }
 
     private void refresh() {
@@ -419,13 +431,13 @@ public class PayAccessibilityService extends AccessibilityService {
         }
 
         //网络异常
-        if (nodeInfoMap.containsKey("Koneksi Internet Buruk")){
+        if (nodeInfoMap.containsKey("Koneksi Internet Buruk")) {
             if (takeLatestOrderBean != null) {
                 error("Saldo Anda tidak cukup", takeLatestOrderBean);
             } else if (collectBillResponse != null) {
                 error("Saldo Anda tidak cukup", collectBillResponse);
             }
-            clickButton(viewIdResourceMap,"id.co.bri.brimo:id/2131362272");
+            clickButton(viewIdResourceMap, "id.co.bri.brimo:id/2131362272");
         }
 
     }
